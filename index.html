@@ -458,6 +458,7 @@
             </div>
             <div class="actions">
               <button onclick="confirmarSalvarConfiguracoes()">Salvar configurações</button>
+              <button onclick="sincronizarDoGoogleSheets()">Sincronizar com Google Sheets</button>
               <button class="secondary" onclick="carregarConfiguracoesNaTela(); mostrarToast('Configurações recarregadas.', 'success')">Recarregar</button>
             </div>
           </div>
@@ -1111,6 +1112,40 @@
     renderizarAniversarios();
 
     function reconstruirTodosConsumos() { clientes.forEach(c => reconstruirConsumoCashback(c.id)); }
+
+    async function sincronizarDoGoogleSheets() {
+  if (!GOOGLE_SCRIPT_URL) {
+    mostrarToast('Configure primeiro a URL do Google Apps Script.', 'warning');
+    return;
+  }
+
+  try {
+    mostrarToast('Sincronizando com Google Sheets...', 'success');
+
+    const resposta = await fetch(GOOGLE_SCRIPT_URL);
+    const dados = await resposta.json();
+
+    if (dados.status !== 'ok') {
+      mostrarToast('Erro ao buscar dados: ' + dados.mensagem, 'danger');
+      return;
+    }
+
+    clientes = dados.clientes || [];
+    movimentacoes = dados.movimentacoes || [];
+
+    salvarBancoLocal();
+    renderizarClientes();
+    renderizarHistorico();
+    atualizarSelectClientes();
+    atualizarTelaCliente();
+
+    mostrarToast('Dados puxados do Google Sheets com sucesso.', 'success');
+
+  } catch (erro) {
+    console.error(erro);
+    mostrarToast('Não foi possível sincronizar com o Google Sheets.', 'danger');
+  }
+}
   </script>
 </body>
 </html>
