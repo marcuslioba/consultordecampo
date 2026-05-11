@@ -1,2440 +1,1152 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> CRM | Inteligente</title>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --primary: #c5a059;
-            --bg-dark: #121417;
-            --card-bg: #1e2126;
-            --sidebar-bg: #1a1d21;
-            --text-main: #e0e0e0;
-            --text-muted: #a0a0a0;
-            --accent: #2c3138;
-            --success: #27ae60;
-            --danger: #e74c3c;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', 'Segoe UI', sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            display: flex;
-            min-height: 100vh;
-        }
-
-        .sidebar {
-            width: 260px;
-            background: var(--sidebar-bg);
-            border-right: 1px solid var(--accent);
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-        }
-
-        .logo-area {
-            text-align: center;
-            padding-bottom: 30px;
-            border-bottom: 1px solid var(--accent);
-            margin-bottom: 20px;
-        }
-
-        .logo-area h1 {
-            color: var(--primary);
-            font-size: 22px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        .nav-menu {
-            list-style: none;
-            flex-grow: 1;
-        }
-
-        .nav-item {
-            padding: 12px 15px;
-            border-radius: 10px;
-            cursor: pointer;
-            margin-bottom: 8px;
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-
-        .nav-item i {
-            margin-right: 12px;
-            width: 20px;
-            text-align: center;
-        }
-
-        .nav-item:hover, .nav-item.active {
-            background: var(--accent);
-            color: var(--primary);
-        }
-
-        .main-content {
-            margin-left: 260px;
-            flex-grow: 1;
-            padding: 30px;
-            width: calc(100% - 260px);
-        }
-
-        .header-title {
-            margin-bottom: 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .header-title h2 {
-            font-size: 24px;
-            color: var(--text-main);
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 15px;
-            border: 1px solid var(--accent);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-card::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 4px; height: 100%;
-            background: var(--primary);
-        }
-
-        .stat-card h3 {
-            font-size: 13px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            margin-bottom: 10px;
-        }
-
-        .stat-card .value {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--primary);
-        }
-
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 20px;
-        }
-
-        .card {
-            background: var(--card-bg);
-            border-radius: 15px;
-            padding: 25px;
-            border: 1px solid var(--accent);
-            margin-bottom: 20px;
-        }
-
-        .card h2 {
-            font-size: 18px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-size: 14px; color: var(--text-muted); }
-        input, select, textarea {
-            width: 100%;
-            background: var(--bg-dark);
-            border: 1px solid var(--accent);
-            padding: 10px;
-            border-radius: 8px;
-            color: white;
-            outline: none;
-        }
-        input:focus, select:focus, textarea:focus { border-color: var(--primary); }
-        input:read-only { background-color: #2c3138; cursor: not-allowed; opacity: 0.7; }
-
-        .btn {
-            background: var(--primary);
-            color: #000;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .btn:hover { opacity: 0.8; transform: translateY(-2px); }
-
-        .btn-secondary {
-            background: var(--accent);
-            color: var(--text-main);
-        }
-
-        .btn-danger {
-            background: var(--danger);
-            color: white;
-        }
-
-        .btn-small {
-            padding: 5px 12px;
-            font-size: 12px;
-        }
-
-        .item-list { list-style: none; }
-        .list-item {
-            background: var(--accent);
-            margin-bottom: 10px;
-            padding: 15px;
-            border-radius: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .list-item-actions {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .badge {
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: bold;
-        }
-
-        .badge-gold { background: var(--primary); color: black; }
-        .badge-success { background: var(--success); color: white; }
-        .badge-danger { background: var(--danger); color: white; }
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.7);
-            overflow-y: auto;
-        }
-
-        .modal-content {
-            background-color: var(--card-bg);
-            margin: 5% auto;
-            padding: 30px;
-            border: 1px solid var(--accent);
-            border-radius: 15px;
-            width: 90%;
-            max-width: 600px;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .close {
-            color: var(--text-muted);
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .close:hover { color: var(--primary); }
-
-        .grid-3 {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-        }
-
-        .alert {
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-
-        .alert-warning {
-            background: rgba(255, 193, 7, 0.1);
-            border: 1px solid rgba(255, 193, 7, 0.3);
-            color: #ffc107;
-        }
-
-        .filter-buttons {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        @media (max-width: 768px) {
-            .sidebar { width: 70px; padding: 10px; }
-            .sidebar span, .logo-area h1 { display: none; }
-            .main-content { margin-left: 70px; width: calc(100% - 70px); }
-            .grid-2, .grid-3 { grid-template-columns: 1fr; }
-        }
-
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: var(--bg-dark); }
-        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
-
-        /* Modal Content */
-#crmConfigModal .modal-content {
-    background-color: #1c1c1e;
-    border-radius: 16px;
-    padding: 24px 28px;
-    max-width: 480px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-    color: #f6f7f2;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-}
-
-.btn-info i {
-  color: var(--primary);
-  font-size: 16px;
-}
-.btn-info:hover i {
-  color: var(--success);
-}
-
-/* Modal Header */
-#crmConfigModal .modal-header h2 {
-    font-weight: 600;
-    font-size: 22px;
-    margin-bottom: 20px;
-    color: #e0e0e0;
-}
-
-/* Close Button */
-#crmConfigModal .close {
-    color: #a0a0a0;
-    font-size: 28px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: color 0.2s ease;
-}
-#crmConfigModal .close:hover {
-    color: #8ab4f8; /* azul suave para hover */
-}
-
-/* Labels */
-#crmConfigModal label {
-    display: block;
-    font-weight: 500;
-    font-size: 14px;
-    margin-bottom: 8px;
-    color: #b0b0b0;
-}
-/* Select */
-#crmSegmentSelect {
-    width: 100%;
-    padding: 10px 14px;
-    border-radius: 12px;
-    border: 1px solid #444444;
-    background-color: #1f1f23;
-    color: #e0e0e0;
-    font-size: 16px;
-    font-weight: 500;
-    appearance: none;
-    cursor: pointer;
-    transition: border-color 0.3s ease;
-    background-image: url("data:image/svg+xml;charset=US-ASCII,%3csvg width='12' height='7' viewBox='0 0 12 7' fill='none' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M1 1L6 6L11 1' stroke='%23e0e0e0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: right 14px center;
-    background-size: 12px 7px;
-}
-#crmSegmentSelect:focus {
-    outline: none;
-    border-color: #8ab4f8;
-    box-shadow: 0 0 8px rgba(138, 180, 248, 0.6);
-}
-
-/* Textarea */
-#crmTemplateMsg {
-    width: 100%;
-    min-height: 120px;
-    padding: 14px 16px;
-    border-radius: 16px;
-    border: 1px solid #444444;
-    background-color: #1f1f23;
-    color: #e0e0e0;
-    font-size: 16px;
-    font-weight: 400;
-    resize: vertical;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-    transition: border-color 0.3s ease;
-}
-#crmTemplateMsg:focus {
-    outline: none;
-    border-color: #8ab4f8;
-    box-shadow: 0 0 8px rgba(138, 180, 248, 0.6);
-}
-
-/* Buttons */
-#crmConfigModal .btn {
-    background-color: #8ab4f8; /* azul suave */
-    color: #1f1f23;
-    font-weight: 700;
-    border-radius: 14px;
-    padding: 12px 24px;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    flex: 1;
-}
-#crmConfigModal .btn:hover {
-    background-color: #6a8ee6;
-}
-
-#crmConfigModal .btn-secondary {
-    background-color: #444444;
-    color: #e0e0e0;
-    font-weight: 600;
-    border-radius: 14px;
-    padding: 12px 24px;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    flex: 1;
-}
-#crmConfigModal .btn-secondary:hover {
-    background-color: #5a5a5a;
-}
-
-/* Small text below textarea */
-#crmConfigModal small {
-    display: block;
-    margin-top: 6px;
-    color: #8e8e93;
-    font-size: 13px;
-    font-weight: 400;
-}
-/* Modal Content - fundo mais neutro e suave */
-#crmConfigModal .modal-content {
-    background-color: #2b2b2f; /* cinza escuro neutro */
-    border-radius: 16px;
-    padding: 24px 28px;
-    max-width: 480px;
-    box-shadow: 0 12px 24px rgba(0,0,0,0.5);
-    color: #e0e0e0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-}
-
-/* Efeito de Hover nas Categorias (Backdrops) */
-.crm-header:hover .crm-header-left, 
-.crm-header:hover i, 
-.crm-header:hover span {
-    color: #c5a059 !important;
-    transition: color 0.3s ease;
-}
-
-/* Cards do CRM - fundo neutro e bordas suaves */
-#crm .card {
-margin-bottom: 24px;
-    box-shadow: none;
-}
-
-#crm h2 {
-    color: #ffffff; /* Texto branco puro, sem cores */
-    font-size: 18px;
-    font-weight: 600;
-    letter-spacing: -0.5px;
-    border-bottom: 1px solid #2c2c2e;
-    padding-bottom: 12px;
-}
-
-#crm .list-item {
-    background-color: transparent; /* Fundo transparente para estilo lista */
-    border-bottom: 1px solid #2c2c2e; /* Divisória fina estilo iOS */
-    border-radius: 0;
-    padding: 14px 0;
-    margin-bottom: 0;
-}
-
-#crm .list-item:last-child {
-    border-bottom: none;
-}
-
-/* Badges e ícones - cores suaves */
-#crm .badge {
-    background-color: #5a5a5a;
-    color: #d0d0d0;
-    font-weight: 600;
-    border-radius: 8px;
-    padding: 4px 10px;
-    font-size: 12px;
-}
-
-/* Botões WhatsApp e Ver - cores neutras */
-/* Botão WhatsApp Ghost - Minimalista */
-.btn-whatsapp-ghost {
-    background: transparent !important;
-    color: #a0a0a0 !important;
-    border: 1px solid #3a3a3c !important;
-    font-weight: 500 !important;
-    transition: all 0.2s ease;
-    border-radius: 07px !important; /* Arredondamento solicitado */
-    padding: 4px 10px;
-}
-
-.btn-whatsapp-ghost:hover {
-    background: #2c2c2e !important;
-    color: #ffffff !important;
-    border-color: #48484a !important;
-}
-
-/* O CARD DE ANIVERSÁRIO (O item da lista que você queria arredondar) */
-.card-aniversario-hoje {
-    background-color: rgba(52, 199, 89, 0.15) !important;
-    border: 1px solid rgba(52, 199, 89, 0.4) !important;
-    border-radius: 15px !important; /* Arredondamento pronunciado */
-    margin: 10px 0 !important;
-    padding: 15px !important;
-}
-
-/* CRM ATIVO - Estética iOS */
-.crm-section {
-    background-color: #1c1c1e; /* Cinza escuro iOS */
-    border-radius: 14px;
-    margin-bottom: 12px;
-    border: 1px solid #2c2c2e;
-    overflow: hidden;
-}
-
-.crm-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px;
-    cursor: pointer;
-    background: transparent; /* Fundo padrão limpo */
-    transition: all 0.2s ease-in-out;
-    border-radius: 12px; /* Arredondado para o efeito de clique */
-}
-/* Efeito Hover igual à barra lateral */
-.crm-header:hover {
-    background-color: rgba(255, 255, 255, 0.05); /* Cinza sutil idêntico ao hover lateral */
-    padding-left: 20px; /* Leve recuo para indicar interação */
-}
-/* Mudança de cor no hover */
-.crm-header:hover .crm-header-left, 
-.crm-header:hover .crm-header-left i {
-    color: #c5a059 !important;
-}
-.crm-header-left {
-    display: flex;
-    align-items: center;
-    gap: 12px; /* Texto perto do ícone */
-    color: #ffffff;
-    font-size: 16px;
-    font-weight: 500;
-}
-
-.crm-header-left i {
-    font-size: 1.2em;
-    width: 24px;
-    text-align: center;
-}
-
-/* Badge de Notificação */
-.crm-badge {
-    background-color: #2c2c2e;
-    color: #8e8e93;
-    font-size: 12px;
-    padding: 2px 10px;
-    border-radius: 20px;
-    font-weight: 600;
-    transition: all 0.3s ease;
-}
-
-.crm-content {
-    display: none;
-    padding: 0 16px 16px 16px;
-    border-top: 1px solid #2c2c2e;
-}
-
-.crm-section.active .crm-content {
-    display: block;
-}
-
-/* Hover leve + zoom nos stat-cards FINANCEIRO --------------------------------------------------------------------------------------------------------------------*/
-.stat-card {
-  transition: transform 0.22s ease, box-shadow 0.22s ease;
-  will-change: transform;
-}
-.stat-card:hover {
-  /*transform: translateY(-6px) scale(1.03);*/
-  box-shadow: 0 7px 15px rgba(0,0,0,0.45);
-  transform: translateY(-6.5px) scale(1);
-}
-
-/* Filtros da área de transações (alinhados à direita do título) */
-.trans-filters {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  margin-left: 12px;
-}
-
-
-
-/* inputs de data e select compactos */
-.trans-filters input[type="date"],
-.trans-filters select {
-  background: var(--bg-dark);
-  border: 1px solid var(--accent);
-  padding: 7px 8px;
-  border-radius: 8px;
-  color: var(--text-main);
-  font-size: 13px;
-  height: 36px;
-}
-
-/* botões pequenos na linha */
-.trans-filters .btn-small {
-  padding: 6px 10px;
-  height: 36px;
-  display: inline-flex;
-  align-items: center;
-}
-
-/* Dropdown (menu) para recolher a seção */
-.dropdown {
-  position: relative;
-}
-.dropdown .dropdown-menu {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 8px);
-  background: var(--card-bg);
-  border: 1px solid var(--accent);
-  border-radius: 10px;
-  display: none;
-  min-width: 160px;
-  z-index: 60;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.45);
-  padding: 6px;
-}
-.dropdown.open .dropdown-menu { display: block; }
-.dropdown .dropdown-item {
-  display: block;
-  width: 100%;
-  text-align: left;
-  background: transparent;
-  border: none;
-  padding: 8px 10px;
-  color: var(--text-main);
-  cursor: pointer;
-  border-radius: 8px;
-  font-size: 14px;
-}
-.dropdown .dropdown-item:hover {
-  background: rgba(197,160,89,0.06);
-  color: var(--primary);
-}
-
-/* Recolher / Expandir seção */
-.card.collapsed .card-content { display: none; }
-.card.collapsed h2 span.title::after {
-  content: " (recolhido)";
-  color: var(--text-muted);
-  font-size: 12px;
-  margin-left: 8px;
-}
-
-/* Responsividade: empilha controles em telas pequenas */
-@media (max-width: 720px) {
-  .trans-filters { flex-wrap: wrap; gap:6px; }
-  .trans-filters input[type="date"], .trans-filters select { width: 100%; }
-}
-
-/* Delta badge abaixo do valor principal CARDS DO DASHBOARD ESTILO IFOOD COM CÁLCULOS EM RELAÇÃO AO PERÍODO PASSADO*/
-.stat-card .delta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 8px;
-  font-size: 13px;
-  color: var(--text-muted);
-}
-.stat-card .delta .icon {
-  width: 18px;
-  height: 18px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  font-size: 12px;
-  border-radius: 4px;
-}
-.stat-card .delta.up {
-  color: var(--success);
-}
-.stat-card .delta.up .icon {
-  background: rgba(39,174,96,0.12);
-  color: var(--success);
-}
-.stat-card .delta.down {
-  color: var(--danger);
-}
-.stat-card .delta.down .icon {
-  background: rgba(231,76,60,0.12);
-  color: var(--danger);
-}
-.stat-card .delta.neutral {
-  color: var(--text-muted);
-}
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistema de Cashback Trevo | Refatorado</title>
+  <style>
+    :root {
+      --bg: #f6f4fb;
+      --surface: #ffffff;
+      --surface-2: #fbf9ff;
+      --primary: #5b2394;
+      --primary-dark: #42166f;
+      --primary-soft: #efe7ff;
+      --accent: #fccf21;
+      --accent-soft: #fff8d7;
+      --text: #1f1726;
+      --muted: #746a7d;
+      --border: #e6deed;
+      --success: #16a34a;
+      --success-soft: #ecfdf5;
+      --danger: #dc2626;
+      --danger-soft: #fef2f2;
+      --warning: #d97706;
+      --warning-soft: #fff7ed;
+      --info: #2563eb;
+      --info-soft: #eff6ff;
+      --shadow: 0 16px 40px rgba(65, 22, 111, 0.10);
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Inter, Arial, Helvetica, sans-serif; }
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(252,207,33,.22), transparent 30%),
+        linear-gradient(135deg, #faf7ff 0%, var(--bg) 100%);
+      color: var(--text);
+      padding: 20px;
+    }
+    .app { max-width: 1180px; margin: 0 auto; }
+
+    header.hero {
+      display: grid;
+      grid-template-columns: 1.35fr .85fr;
+      gap: 20px;
+      align-items: stretch;
+      margin-bottom: 20px;
+    }
+    .hero-main, .hero-summary, .card {
+      background: rgba(255,255,255,.94);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(230,222,237,.9);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+    }
+    .hero-main { padding: 28px; position: relative; overflow: hidden; }
+    .hero-main::after {
+      content: ""; width: 190px; height: 190px; border-radius: 50%;
+      background: var(--accent); opacity: .22; position: absolute; right: -56px; top: -56px;
+    }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--primary-soft); color: var(--primary);
+      border-radius: 999px; padding: 8px 12px; font-size: 13px; font-weight: 900; margin-bottom: 14px;
+    }
+    h1 { font-size: clamp(28px, 4vw, 42px); line-height: 1.05; color: var(--primary-dark); letter-spacing: -1px; margin-bottom: 10px; }
+    .hero-main p, .muted { color: var(--muted); line-height: 1.55; }
+    .hero-summary { padding: 22px; display: grid; gap: 12px; }
+    .metric { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px; }
+    .metric span { display: block; color: var(--muted); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
+    .metric strong { display: block; margin-top: 4px; font-size: 24px; color: var(--primary-dark); }
+
+    .layout { display: grid; grid-template-columns: 270px 1fr; gap: 18px; align-items: start; }
+    .sidebar { position: sticky; top: 18px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 14px; }
+    .nav-title { font-size: 13px; color: var(--muted); margin: 4px 8px 12px; font-weight: 900; text-transform: uppercase; letter-spacing: .05em; }
+    .tab-btn {
+      width: 100%; border: 1px solid transparent; background: transparent; color: var(--text);
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 13px 14px; border-radius: 14px; font-size: 15px; font-weight: 900; cursor: pointer;
+      transition: all .2s ease; margin-bottom: 6px; text-align: left;
+    }
+    .tab-btn:hover { background: var(--primary-soft); color: var(--primary-dark); transform: translateX(3px); border-color: #dccdf5; }
+    .tab-btn.active { background: var(--primary); color: white; box-shadow: 0 12px 24px rgba(91,35,148,.22); }
+    .tab-btn .icon { width: 30px; height: 30px; display: inline-grid; place-items: center; border-radius: 10px; background: rgba(91,35,148,.10); }
+    .tab-btn.active .icon { background: rgba(255,255,255,.16); }
+    .content { min-width: 0; }
+    .view { display: none; animation: fade .18s ease; }
+    .view.active { display: block; }
+    @keyframes fade { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    .card { padding: 22px; margin-bottom: 18px; }
+    .section-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 18px; }
+    h2 { font-size: 22px; color: var(--primary-dark); margin-bottom: 5px; }
+    h3 { color: var(--primary-dark); }
+    .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .form-grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .full { grid-column: 1 / -1; }
+    label { display: block; margin-bottom: 7px; font-size: 13px; font-weight: 900; color: #46384f; }
+    input, select {
+      width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+      font-size: 15px; outline: none; background: white; color: var(--text); transition: .18s ease;
+    }
+    input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(91,35,148,.10); }
+    input[readonly] { background: #f7f3fb; color: var(--muted); }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+    button, .btn {
+      border: none; border-radius: var(--radius-sm); padding: 13px 16px; font-size: 14px; font-weight: 900;
+      cursor: pointer; background: var(--primary); color: white; transition: transform .18s ease, box-shadow .18s ease, background .18s ease, opacity .18s ease;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px;
+    }
+    button:hover, .btn:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(91,35,148,.18); background: var(--primary-dark); }
+    button:disabled { opacity: .45; cursor: not-allowed; transform: none; box-shadow: none; }
+    button:active { transform: translateY(0); }
+    button.secondary { background: #f0edf4; color: var(--primary-dark); border: 1px solid var(--border); }
+    button.secondary:hover { background: var(--primary-soft); }
+    button.success { background: var(--success); }
+    button.success:hover { background: #12833d; }
+    button.danger { background: var(--danger); }
+    button.danger:hover { background: #b91c1c; }
+    button.warning { background: var(--warning); }
+    button.warning:hover { background: #b45309; }
+    button.info { background: var(--info); }
+    button.small-btn { padding: 9px 11px; min-height: 36px; font-size: 12px; border-radius: 10px; }
+
+    .client-card { display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: center; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border-radius: 22px; padding: 20px; margin-top: 16px; }
+    .client-card h3 { font-size: 24px; margin-bottom: 6px; color: white; }
+    .client-card p { opacity: .9; line-height: 1.55; }
+    .saldo-pill { background: var(--accent); color: #3b2600; padding: 16px; border-radius: 18px; min-width: 190px; text-align: center; box-shadow: inset 0 -4px 0 rgba(0,0,0,.08); }
+    .saldo-pill span { display: block; font-size: 12px; font-weight: 900; text-transform: uppercase; }
+    .saldo-pill strong { display: block; font-size: 28px; margin-top: 4px; }
+    .empty { background: var(--surface-2); border: 1px dashed #d8cbe6; color: var(--muted); border-radius: var(--radius-md); padding: 18px; line-height: 1.5; }
+    .notice { background: var(--accent-soft); border: 1px solid #f6df7d; border-radius: var(--radius-md); padding: 14px; color: #5c4400; line-height: 1.5; }
+
+    .table-wrap { overflow: auto; border: 1px solid var(--border); border-radius: var(--radius-md); background: white; }
+    table { width: 100%; border-collapse: collapse; min-width: 860px; }
+    th, td { padding: 13px; border-bottom: 1px solid var(--border); text-align: left; font-size: 14px; vertical-align: middle; }
+    th { color: var(--primary-dark); background: var(--surface-2); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+    tr:hover td { background: #fffdf2; }
+    tr:last-child td { border-bottom: none; }
+    .badge { display: inline-flex; align-items: center; gap: 5px; padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 900; background: var(--primary-soft); color: var(--primary-dark); }
+    .badge.success { background: var(--success-soft); color: #14532d; }
+    .badge.danger { background: var(--danger-soft); color: #991b1b; }
+    .badge.warning { background: var(--warning-soft); color: #92400e; }
+    .badge.info { background: var(--info-soft); color: #1d4ed8; }
+
+    .toast { position: fixed; right: 22px; bottom: 22px; z-index: 40; display: grid; gap: 10px; max-width: 390px; }
+    .toast-item { background: var(--surface); color: var(--text); border: 1px solid var(--border); border-left: 5px solid var(--primary); border-radius: 16px; box-shadow: 0 14px 35px rgba(0,0,0,.14); padding: 14px 16px; line-height: 1.45; animation: slide .2s ease; }
+    .toast-item.success { border-left-color: var(--success); }
+    .toast-item.danger { border-left-color: var(--danger); }
+    .toast-item.warning { border-left-color: var(--warning); }
+    .toast-item.info { border-left-color: var(--info); }
+    @keyframes slide { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
+
+    .modal-backdrop { position: fixed; inset: 0; display: none; place-items: center; background: rgba(31,23,38,.45); z-index: 35; padding: 18px; }
+    .modal-backdrop.active { display: grid; }
+    .modal { width: min(620px, 100%); background: white; border-radius: 24px; box-shadow: 0 24px 70px rgba(0,0,0,.24); padding: 22px; max-height: 92vh; overflow: auto; }
+    .modal h3 { font-size: 22px; color: var(--primary-dark); margin-bottom: 8px; }
+    .modal p { color: var(--muted); line-height: 1.55; }
+    .modal .actions { justify-content: flex-end; }
+    .danger-zone { background: var(--danger-soft); border: 1px solid #fecaca; border-radius: var(--radius-md); padding: 16px; margin-top: 18px; }
+
+
+
+    .mobile-list { display: none; }
+    .mobile-record-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: 0 10px 24px rgba(65, 22, 111, 0.07);
+      margin-bottom: 12px;
+    }
+    .mobile-record-card h3 { font-size: 16px; color: var(--primary-dark); margin-bottom: 6px; }
+    .mobile-record-card p { color: var(--muted); line-height: 1.45; font-size: 13px; }
+    .mobile-record-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
+    .mobile-record-meta div { background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 10px; }
+    .mobile-record-meta span { display: block; color: var(--muted); font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: .03em; margin-bottom: 3px; }
+    .mobile-record-meta strong { display: block; color: var(--primary-dark); font-size: 14px; }
+    .mobile-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+    .mobile-actions.two { grid-template-columns: repeat(2, 1fr); }
+    .mobile-actions.one { grid-template-columns: 1fr; }
+    .mobile-actions button, .mobile-actions .btn { width: 100%; min-height: 42px; padding: 10px 8px; font-size: 12px; }
+
+    @media (max-width: 900px) {
+      header.hero, .layout { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+      .nav-stack { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+      .tab-btn { margin-bottom: 0; }
+    }
+    @media (max-width: 680px) {
+      body { padding: 10px 10px 88px; }
+      .app { max-width: 100%; }
+      header.hero { gap: 10px; margin-bottom: 10px; }
+      .hero-main { padding: 18px; border-radius: 20px; }
+      .hero-main::after { width: 120px; height: 120px; right: -46px; top: -46px; }
+      .eyebrow { font-size: 12px; padding: 7px 10px; margin-bottom: 10px; }
+      h1 { font-size: 25px; line-height: 1.08; margin-bottom: 8px; }
+      .hero-main p { font-size: 13px; }
+      .hero-summary { grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px; border-radius: 18px; }
+      .metric { padding: 10px 8px; border-radius: 14px; text-align: center; }
+      .metric span { font-size: 9px; line-height: 1.15; }
+      .metric strong { font-size: 15px; }
+      .layout { display: block; }
+      .content { padding-bottom: 6px; }
+      .card { padding: 16px; border-radius: 20px; margin-bottom: 12px; }
+      h2 { font-size: 19px; }
+      label { font-size: 12px; }
+      input, select { min-height: 50px; font-size: 16px; padding: 13px; }
+      button, .btn { min-height: 50px; padding: 12px 14px; }
+      .form-grid, .form-grid.three { grid-template-columns: 1fr; gap: 12px; }
+      .client-card { grid-template-columns: 1fr; padding: 16px; border-radius: 18px; }
+      .client-card h3 { font-size: 20px; }
+      .saldo-pill { width: 100%; min-width: 0; }
+      .section-head { flex-direction: column; gap: 10px; margin-bottom: 14px; }
+      .actions { display: grid; grid-template-columns: 1fr; gap: 8px; }
+      .actions button, .actions .btn { width: 100%; }
+      .table-wrap { display: none; }
+      .mobile-list { display: block; }
+      .sidebar {
+        position: fixed;
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        top: auto;
+        z-index: 32;
+        padding: 8px;
+        border-radius: 22px;
+        box-shadow: 0 16px 40px rgba(31, 23, 38, .22);
+      }
+      .nav-title { display: none; }
+      .nav-stack { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+      .tab-btn {
+        min-height: 58px;
+        padding: 7px 4px;
+        margin: 0;
+        display: grid;
+        place-items: center;
+        font-size: 10px;
+        line-height: 1.15;
+        text-align: center;
+        border-radius: 16px;
+      }
+      .tab-btn > span:first-child { display: grid; place-items: center; gap: 3px; }
+      .tab-btn > span:last-child { display: none; }
+      .tab-btn .icon { width: 26px; height: 26px; font-size: 14px; }
+      .tab-btn[data-view="aniversarios"], .tab-btn[data-view="backup"] { display: none; }
+      .tab-btn:hover { transform: none; }
+      .toast { left: 12px; right: 12px; bottom: 86px; max-width: none; }
+      .modal-backdrop { padding: 12px; align-items: end; }
+      .modal { border-radius: 24px 24px 18px 18px; padding: 18px; max-height: 86vh; }
+      .mobile-record-meta { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
 </head>
 <body>
+  <div class="app">
+    <header class="hero">
+      <div class="hero-main">
+        <div class="eyebrow">🍀 Sistema de Cashback</div>
+        <h1>Cashback com operação simples, segura e auditável.</h1>
+        <p>Cadastro, venda, histórico, aniversário, validade do saldo e registro de eventos para Google Sheets. A tela mostra uma função por vez para facilitar o uso no caixa.</p>
+      </div>
+      <div class="hero-summary">
+        <div class="metric"><span>Clientes cadastrados</span><strong id="metricClientes">0</strong></div>
+        <div class="metric"><span>Vendas ativas</span><strong id="metricVendas">0</strong></div>
+        <div class="metric"><span>Cashback disponível</span><strong id="metricSaldo">R$ 0,00</strong></div>
+      </div>
+    </header>
 
-    <aside class="sidebar">
-        <div class="logo-area">
-            <h1>RESOLVE | CRM</h1>
+    <main class="layout">
+      <aside class="sidebar">
+        <div class="nav-title">Navegação</div>
+        <div class="nav-stack">
+          <button class="tab-btn active" data-view="dashboard" onclick="abrirTela('dashboard', this)"><span><span class="icon">🏠</span> Início</span><span>›</span></button>
+          <button class="tab-btn" data-view="clientes" onclick="abrirTela('clientes', this)"><span><span class="icon">👤</span> Clientes</span><span>›</span></button>
+          <button class="tab-btn" data-view="vendas" onclick="abrirTela('vendas', this)"><span><span class="icon">🧾</span> Vendas</span><span>›</span></button>
+          <button class="tab-btn" data-view="historico" onclick="abrirTela('historico', this)"><span><span class="icon">📋</span> Histórico</span><span>›</span></button>
+          <button class="tab-btn" data-view="aniversarios" onclick="abrirTela('aniversarios', this)"><span><span class="icon">🎂</span> Aniversários</span><span>›</span></button>
+          <button class="tab-btn" data-view="config" onclick="abrirTela('config', this)"><span><span class="icon">⚙️</span> Configurações</span><span>›</span></button>
+          <button class="tab-btn" data-view="backup" onclick="abrirTela('backup', this)"><span><span class="icon">💾</span> Backup</span><span>›</span></button>
         </div>
-        <nav class="nav-menu">
-            <div class="nav-item active" onclick="switchTab('dashboard', this)">
-                <i class="fas fa-chart-line"></i><span>Dashboard</span>
-            </div>
-            <div class="nav-item" onclick="switchTab('clientes', this)">
-                <i class="fas fa-users"></i><span>Clientes</span>
-            </div>
-            <div class="nav-item" onclick="switchTab('crm', this)">
-                <i class="fas fa-bullseye"></i><span>CRM Ativo</span>
-            </div>
-            <div class="nav-item" onclick="switchTab('financeiro', this)">
-                <i class="fas fa-wallet"></i><span>Financeiro</span>
-            </div>
-            <div class="nav-item" onclick="switchTab('config', this)">
-                <i class="fas fa-cog"></i><span>Configurações</span>
-            </div>
-        </nav>
-    </aside>
+      </aside>
 
-    <main class="main-content">
-        <div id="dashboard" class="tab-content active">
-            <div class="header-title">
-                <h2>Resumo Executivo</h2>
-                <div class="filter-buttons">
-                    <button class="btn btn-small" onclick="setFiltroDashboard(7)">7 dias</button>
-                    <button class="btn btn-small" onclick="setFiltroDashboard(15)">15 dias</button>
-                    <button class="btn btn-small btn-secondary" onclick="setFiltroDashboard(30)">30 dias</button>
-                </div>
+      <section class="content">
+        <div id="dashboard" class="view active">
+          <div class="card">
+            <div class="section-head">
+              <div>
+                <h2>Fluxo rápido de caixa</h2>
+                <p class="muted">Busque pelo telefone, veja saldo válido e vá direto para a venda.</p>
+              </div>
+              <button onclick="abrirTelaPorId('vendas')">Registrar venda</button>
             </div>
-            
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <h3>Receita no Período</h3>
-                    <div class="value" id="receitaMes">R$ 0,00</div>
-                </div>
-                <div class="stat-card">
-                    <h3>Ticket Médio</h3>
-                    <div class="value" id="ticketMedio">R$ 0,00</div>
-                </div>
-                <div class="stat-card">
-                    <h3>Visitas no Período</h3>
-                    <div class="value" id="totalVisitas">0</div>
-                </div>
-                <div class="stat-card">
-                    <h3>Novos Clientes</h3>
-                    <div class="value" id="novosClientes">0</div>
-                </div>
+            <div class="form-grid">
+              <div>
+                <label>Telefone do cliente</label>
+                <input id="telefoneBusca" type="tel" placeholder="Ex: (85) 99999-9999" oninput="mascararTelefoneInput(this)" onkeydown="enterParaConsultar(event)" />
+              </div>
+              <div class="actions" style="align-items:end;margin-top:19px;">
+                <button onclick="consultarCliente()">Consultar cliente</button>
+                <button class="secondary" onclick="limparClienteAtual()">Limpar</button>
+              </div>
             </div>
-
-            <div class="grid-2">
-                <div class="card">
-                    <h2>📈 Desempenho Financeiro</h2>
-                    <div style="height: 300px;">
-                        <canvas id="financeChart"></canvas>
-                    </div>
-                </div>
-                <div class="card">
-                    <h2>👑 Top Clientes</h2>
-                    <ul class="item-list" id="vipListShort"></ul>
-                </div>
-            </div>
-
-            <div class="grid-2">
-                <div class="card">
-                    <h2>📅 Dias de Maior Movimento</h2>
-                    <ul class="item-list" id="diasMovimento"></ul>
-                </div>
-                <div class="card">
-                    <h2>💳 Formas de Pagamento</h2>
-                    <ul class="item-list" id="formasPagamento"></ul>
-                </div>
-            </div>
+            <div id="resultadoCliente" class="empty" style="margin-top:16px;">Nenhum cliente consultado ainda.</div>
+          </div>
         </div>
-        <!-- BOTAO (i) para dar o a informação completa dentro dos cards de KPI DO DASHBOARD -->
-        <div id="detalhesModal" class="modal" style="display:none; position:fixed; z-index:2000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.6);">
-  <div style="background: var(--card-bg); color: var(--text-main); max-width: 400px; margin: 10% auto; padding: 20px; border-radius: 12px; position: relative;">
-    <button onclick="fecharModalDetalhes()" style="position:absolute; top:10px; right:10px; background:none; border:none; font-size:20px; color: var(--text-muted); cursor:pointer;">&times;</button>
-    <h3>Detalhes da Variação</h3>
-    <div id="detalhesConteudo" style="margin-top: 15px; font-size: 16px;"></div>
+
+        <div id="clientes" class="view">
+          <div class="card">
+            <div class="section-head">
+              <div>
+                <h2>Clientes</h2>
+                <p class="muted">Cadastre, consulte, edite ou apague clientes com segurança.</p>
+              </div>
+              <button class="secondary" onclick="limparFormularioCliente()">Novo cadastro</button>
+            </div>
+            <input id="clienteEditId" type="hidden" />
+            <div class="form-grid">
+              <div>
+                <label>Nome do cliente</label>
+                <input id="nomeCliente" type="text" placeholder="Nome completo" maxlength="80" />
+              </div>
+              <div>
+                <label>Telefone</label>
+                <input id="telefoneCliente" type="tel" placeholder="Ex: (85) 99999-9999" oninput="mascararTelefoneInput(this)" />
+              </div>
+              <div>
+                <label>Data de nascimento</label>
+                <input id="nascimentoCliente" type="date" />
+              </div>
+              <div>
+                <label>Observação interna</label>
+                <input id="obsCliente" type="text" placeholder="Opcional" maxlength="120" />
+              </div>
+            </div>
+            <div class="actions">
+              <button onclick="salvarCliente()">Salvar cliente</button>
+              <button class="secondary" onclick="limparFormularioCliente()">Cancelar edição</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-head">
+              <div>
+                <h2>Lista de clientes</h2>
+                <p class="muted">Pesquise por nome ou telefone.</p>
+              </div>
+            </div>
+            <label>Pesquisar cliente</label>
+            <input id="buscaClientes" placeholder="Digite nome ou telefone" oninput="renderizarClientes()" />
+            <div id="listaClientes" style="margin-top:14px;"></div>
+          </div>
+        </div>
+
+        <div id="vendas" class="view">
+          <div class="card">
+            <div class="section-head">
+              <div>
+                <h2>Registrar venda</h2>
+                <p class="muted">O sistema valida saldo, limite por compra, validade e valor mínimo.</p>
+              </div>
+              <button class="secondary" onclick="abrirTelaPorId('clientes')">Cadastrar cliente</button>
+            </div>
+            <div class="form-grid three">
+              <div>
+                <label>Cliente</label>
+                <select id="clienteVenda" onchange="selecionarClienteVenda()"></select>
+              </div>
+              <div>
+                <label>Valor da compra</label>
+                <input id="valorCompra" type="number" step="0.01" min="0" placeholder="Ex: 100.00" oninput="atualizarPreviaVenda()" />
+              </div>
+              <div>
+                <label>Cashback usado</label>
+                <input id="cashbackUsado" type="number" step="0.01" min="0" placeholder="Ex: 10.00" oninput="atualizarPreviaVenda()" />
+              </div>
+            </div>
+            <div id="resumoClienteVenda" class="empty" style="margin-top:16px;">Selecione um cliente para visualizar saldo e limites.</div>
+            <div id="previaVenda" class="notice" style="margin-top:14px; display:none;"></div>
+            <div class="actions">
+              <button class="success" id="btnFinalizarVenda" onclick="confirmarRegistroVenda()">Finalizar venda</button>
+              <button class="secondary" onclick="limparVenda()">Cancelar</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="historico" class="view">
+          <div class="card">
+            <div class="section-head">
+              <div>
+                <h2>Histórico de movimentações</h2>
+                <p class="muted">Cancelar estorna o saldo. Editar recalcula a venda e registra evento para auditoria.</p>
+              </div>
+              <button class="secondary" onclick="renderizarHistorico()">Atualizar lista</button>
+            </div>
+            <div class="form-grid">
+              <div>
+                <label>Filtrar por cliente/telefone</label>
+                <input id="buscaHistorico" placeholder="Digite nome ou telefone" oninput="renderizarHistorico()" />
+              </div>
+              <div>
+                <label>Status</label>
+                <select id="filtroStatus" onchange="renderizarHistorico()">
+                  <option value="todos">Todos</option>
+                  <option value="ativo">Ativos</option>
+                  <option value="cancelado">Cancelados</option>
+                </select>
+              </div>
+            </div>
+            <div id="listaHistorico" style="margin-top:14px;"></div>
+          </div>
+        </div>
+
+        <div id="aniversarios" class="view">
+          <div class="card">
+            <div class="section-head">
+              <div>
+                <h2>Aniversários</h2>
+                <p class="muted">Clientes com data de nascimento cadastrada para ações de WhatsApp.</p>
+              </div>
+              <button class="secondary" onclick="renderizarAniversarios()">Atualizar</button>
+            </div>
+            <div class="form-grid">
+              <div>
+                <label>Mês</label>
+                <select id="filtroMesAniversario" onchange="renderizarAniversarios()"></select>
+              </div>
+              <div>
+                <label>Mensagem base para WhatsApp</label>
+                <input id="mensagemWhatsapp" value="Olá, {nome}! A Trevo Açaí deseja um feliz aniversário para você! 🍀💜" />
+              </div>
+            </div>
+            <div id="listaAniversarios" style="margin-top:14px;"></div>
+          </div>
+        </div>
+
+        <div id="config" class="view">
+          <div class="card">
+            <div class="section-head">
+              <div>
+                <h2>Configurações do cashback</h2>
+                <p class="muted">As novas regras serão aplicadas nas próximas vendas.</p>
+              </div>
+            </div>
+            <div class="form-grid">
+              <div><label>Percentual de cashback (%)</label><input id="percentualCashback" type="number" step="0.01" min="0" max="100" /></div>
+              <div><label>Validade do cashback em dias</label><input id="validadeCashback" type="number" min="1" /></div>
+              <div><label>Valor mínimo para gerar cashback</label><input id="valorMinimoGerar" type="number" step="0.01" min="0" /></div>
+              <div><label>Saldo mínimo para usar cashback</label><input id="saldoMinimoUso" type="number" step="0.01" min="0" /></div>
+              <div><label>Limite máximo de uso por compra (%)</label><input id="limiteUsoPorCompra" type="number" step="0.01" min="0" max="100" /></div>
+              <div><label>URL do Google Apps Script</label><input id="googleScriptUrl" type="url" placeholder="Cole aqui a URL do Web App" /></div>
+            </div>
+            <div class="notice" style="margin-top:16px;">
+              Recomendação: no Google Sheets, use uma aba de eventos. Assim, cada cadastro, edição, venda, cancelamento e exclusão fica registrado como auditoria.
+            </div>
+            <div class="actions">
+              <button onclick="confirmarSalvarConfiguracoes()">Salvar configurações</button>
+              <button class="secondary" onclick="carregarConfiguracoesNaTela(); mostrarToast('Configurações recarregadas.', 'success')">Recarregar</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="backup" class="view">
+          <div class="card">
+            <div class="section-head">
+              <div>
+                <h2>Backup e exportação</h2>
+                <p class="muted">Baixe dados locais ou eventos para subir manualmente no Google Sheets.</p>
+              </div>
+            </div>
+            <div class="actions">
+              <button onclick="exportarBackupCSV()">Baixar vendas em CSV</button>
+              <button class="secondary" onclick="exportarClientesCSV()">Baixar clientes em CSV</button>
+              <button class="info" onclick="exportarEventosCSV()">Baixar auditoria/eventos</button>
+            </div>
+            <div class="danger-zone">
+              <h2 style="font-size:18px;">Zona de cuidado</h2>
+              <p class="muted">Use apenas em teste ou reinício do sistema local.</p>
+              <div class="actions">
+                <button class="danger" onclick="confirmarLimparTudo()">Apagar todos os dados locais</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
   </div>
 
-</div>
+  <div id="toast" class="toast"></div>
 
-<div id="clientes" class="tab-content" style="display:none">
-    <div class="header-title">
-        <h2>Gestão de Clientes</h2>
-        <button class="btn" onclick="openModal('clienteModal')">
-            <i class="fas fa-plus"></i> Novo Cliente
-        </button>
-    </div>
-    <div class="card">
-        <div class="form-group" style="margin-bottom: 20px;">
-            <input type="text" id="clienteSearch" placeholder="Buscar por nome ou documento..." style="width: 100%;">
-        </div>
-        <ul class="item-list" id="clientesList"></ul>
-    </div>
-</div>
-
-<div id="crm" class="tab-content" style="display:none">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2 style="margin:0; font-size: 24px; color: #fff;">CRM Ativo</h2>
-        <button class="btn btn-secondary" onclick="openModal('crmConfigModal')" style="border-radius: 50%; width: 40px; height: 40px; padding: 0;">
-            <i class="fas fa-cog"></i>
-        </button>
-    </div>
-
-    <div class="crm-section" id="sec-aniversario">
-        <div class="crm-header" onclick="toggleCRMSection('sec-aniversario')">
-            <div class="crm-header-left">
-                <i class="fas fa-birthday-cake"></i>
-                <span>Aniversariantes do Mês</span>
-            </div>
-            <span class="crm-badge" id="badge-aniversario">0</span>
-        </div>
-        <div class="crm-content">
-            <ul class="item-list" id="listaAniversariantes" style="list-style: none; padding: 0;"></ul>
-        </div>
-    </div>
-
-    <div class="crm-section" id="sec-inativos15">
-        <div class="crm-header" onclick="toggleCRMSection('sec-inativos15')">
-            <div class="crm-header-left">
-                <i class="fas fa-user-clock"></i>
-                <span>Inativos há 15+ dias</span>
-            </div>
-            <span class="crm-badge" id="badge-inativos15">0</span>
-        </div>
-        <div class="crm-content">
-            <ul class="item-list" id="listaInativos15" style="list-style: none; padding: 0;"></ul>
-        </div>
-    </div>
-
-    <div class="crm-section" id="sec-inativos30">
-        <div class="crm-header" onclick="toggleCRMSection('sec-inativos30')">
-            <div class="crm-header-left">
-                <i class="fas fa-exclamation-circle"></i>
-                <span>Inativos há 30+ dias</span>
-            </div>
-            <span class="crm-badge" id="badge-inativos30">0</span>
-        </div>
-        <div class="crm-content">
-            <ul class="item-list" id="listaInativos30" style="list-style: none; padding: 0;"></ul>
-        </div>
-    </div>
-
-    <div class="crm-section" id="sec-frequencia">
-        <div class="crm-header" onclick="toggleCRMSection('sec-frequencia')">
-            <div class="crm-header-left">
-                <i class="fas fa-chart-line"></i> <span>Atenção: Frequência</span>
-            </div>
-            <span class="crm-badge" id="badge-frequencia">0</span>
-        </div>
-        <div class="crm-content">
-            <ul class="item-list" id="listaQuedaFrequencia" style="list-style: none; padding: 0;"></ul>
-        </div>
-    </div>
-
-    <div class="crm-section" id="sec-churn">
-        <div class="crm-header" onclick="toggleCRMSection('sec-churn')">
-            <div class="crm-header-left">
-                <i class="fas fa-user-slash"></i>
-                <span>Recuperação de Clientes</span>
-            </div>
-            <span class="crm-badge" id="badge-churn">0</span>
-        </div>
-        <div class="crm-content">
-            <ul class="item-list" id="listaChurn" style="list-style: none; padding: 0;"></ul>
-        </div>
-    </div>
-</div>
-
-<div id="crmConfigModal" class="modal">
-    <div class="modal-content">
-        <h3>Configurar Mensagens CRM</h3>
-        <label>Selecione o Segmento:</label>
-        <select id="crmSegmentSelect" class="form-control" style="margin-bottom: 15px;">
-            <option value="aniversario">Aniversariantes</option>
-            <option value="inativos15">Inativos 15+ dias</option>
-            <option value="inativos30">Inativos 30+ dias</option>
-            <option value="queda">Atenção: Frequência</option>
-            <option value="churn">Recuperação</option>
-        </select>
-        
-        <label>Mensagem (Use {{nome}} para o nome do cliente):</label>
-        <textarea id="crmTemplateMsg" class="form-control" rows="5"></textarea>
-        
-        <div style="margin-top: 20px; display: flex; gap: 10px;">
-            <button class="btn btn-primary" onclick="salvarTemplateCRM()">Salvar</button>
-            <button class="btn btn-secondary" onclick="closeModal('crmConfigModal')">Cancelar</button>
-        </div>
-    </div>
-</div>
-
-<div id="crmConfigModal" class="modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h2>Configurar Mensagem WhatsApp</h2>
-      <span class="close" onclick="closeModal('crmConfigModal')">&times;</span>
-    </div>
-
-    <div class="form-group">
-      <label>Segmento</label>
-      <select id="crmSegmentSelect">
-        <option value="aniversario">Aniversariantes do Mês</option>
-        <option value="inativos15">Inativos há 15+ dias</option>
-        <option value="inativos30">Inativos há 30+ dias</option>
-        <option value="queda">Frequência Diminuindo</option>
-        <option value="churn">Risco de Churn</option>
-      </select>
-    </div>
-
-    <div class="form-group">
-      <label>Template da Mensagem</label>
-      <textarea id="crmTemplateMsg" rows="6" placeholder="Olá {{nome}}, ..."></textarea>
-      <small style="color: var(--text-muted);">Use <strong>{{nome}}</strong> para inserir o primeiro nome do cliente automaticamente.</small>
-    </div>
-
-    <div style="display:flex; gap:10px; margin-top:12px;">
-      <button class="btn" onclick="salvarTemplateCRM()">Salvar Template</button>
-      <button class="btn btn-secondary" onclick="resetTemplateDefault()">Restaurar Padrão</button>
-    </div>
-  </div>
-</div>
-
-        <div id="financeiro" class="tab-content" style="display:none">
-            <div class="header-title">
-                <h2>Financeiro Detalhado</h2>
-                <button class="btn" onclick="openModal('transacaoModal')">
-                    <i class="fas fa-plus"></i> Nova Transação
-                </button>
-            </div>
-
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <h3>Total Receitas</h3>
-                    <div class="value" id="totalReceitas">R$ 0,00</div>
-                </div>
-                <div class="stat-card">
-                    <h3>Total Despesas</h3>
-                    <div class="value" id="totalDespesas">R$ 0,00</div>
-                </div>
-                <div class="stat-card">
-                    <h3>Lucro Líquido</h3>
-                    <div class="value" id="lucroLiquido">R$ 0,00</div>
-                </div>
-            </div>
-
-<div class="card" id="transacoesCard">
-  <h2>
-    <span class="title">💰 Últimas Transações</span>
-
-    <!-- Controles / Filtros alinhados à direita -->
-    <div class="trans-filters" style="margin-left:auto;">
-      <select id="filtroTipo" title="Tipo">
-        <option value="todas">Todas</option>
-        <option value="receita">Receitas</option>
-        <option value="despesa">Despesas</option>
-      </select>
-
-      <input type="date" id="filtroDataInicio" title="Data início">
-      <input type="date" id="filtroDataFim" title="Data fim">
-
-      <button class="btn btn-small btn-secondary" id="aplicarFiltroBtn" onclick="aplicarFiltroTransacoes()">Aplicar</button>
-      <button class="btn btn-small" id="limparFiltroBtn" onclick="limparFiltroTransacoes()">Limpar</button>
-
-      <!-- Dropdown para recolher a seção -->
-      <div class="dropdown" style="margin-left:6px;">
-        <button class="btn btn-small" id="dropdownToggle" onclick="toggleDropdownMenu(event)">
-          <i class="fas fa-ellipsis-v"></i>
-        </button>
-        <div class="dropdown-menu" id="dropdownMenu">
-          <button class="dropdown-item" onclick="toggleTransacoesSection()">Recolher / Expandir seção</button>
-        </div>
+  <div id="modalConfirmacao" class="modal-backdrop">
+    <div class="modal">
+      <h3 id="modalTitulo">Confirmar ação</h3>
+      <p id="modalMensagem">Tem certeza?</p>
+      <div class="actions">
+        <button class="secondary" onclick="fecharModal('modalConfirmacao')">Voltar</button>
+        <button id="modalBotaoConfirmar" class="danger">Confirmar</button>
       </div>
     </div>
-  </h2>
-
-  <div class="card-content">
-    <ul class="item-list" id="transacoesList"></ul>
   </div>
-</div>
-        </div>
 
-        <div id="config" class="tab-content" style="display:none">
-            <div class="header-title">
-                <h2>Configurações</h2>
-            </div>
-            <div class="card">
-                <h2>⚙️ Preferências do Sistema</h2>
-                <p style="color: var(--text-muted);">Em breve: dados da barbearia, integrações, backup, etc.</p>
-            </div>
-        </div>
-    </main>
-
-    <div id="clienteModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Novo Cliente</h2>
-                <span class="close" onclick="closeModal('clienteModal')">&times;</span>
-            </div>
-            <form id="clienteForm">
-                <div class="form-group">
-                    <label>Nome Completo</label>
-                    <input type="text" id="clienteNome" placeholder="Ex: João Silva" required>
-                </div>
-                <div class="form-group">
-                    <label>WhatsApp</label>
-                    <input type="tel" id="clienteTelefone" placeholder="11999999999" pattern="\d{10,11}" required>
-                </div>
-                <div class="form-group">
-                    <label>Data de Nascimento</label>
-                    <input type="date" id="clienteNascimento">
-                </div>
-                <div class="form-group">
-                    <label>Observações (opcional)</label>
-                    <textarea id="clienteObs" rows="3" placeholder="Ex: Prefere corte degradê"></textarea>
-                </div>
-                <button type="submit" class="btn">Cadastrar Cliente</button>
-                <div class="form-group">
-</div>
-            </form>
-        </div>
+  <div id="modalEditarVenda" class="modal-backdrop">
+    <div class="modal">
+      <h3>Editar venda</h3>
+      <p>Altere os valores e confirme. O saldo do cliente será recalculado.</p>
+      <input id="editarVendaId" type="hidden" />
+      <div class="form-grid" style="margin-top:16px;">
+        <div><label>Novo valor da compra</label><input id="editarValorCompra" type="number" step="0.01" min="0" oninput="atualizarPreviaEdicaoVenda()" /></div>
+        <div><label>Novo cashback usado</label><input id="editarCashbackUsado" type="number" step="0.01" min="0" oninput="atualizarPreviaEdicaoVenda()" /></div>
+      </div>
+      <div id="previaEdicaoVenda" class="notice" style="margin-top:14px;"></div>
+      <div class="actions">
+        <button class="secondary" onclick="fecharModal('modalEditarVenda')">Cancelar</button>
+        <button class="success" onclick="confirmarEdicaoVenda()">Salvar edição</button>
+      </div>
     </div>
+  </div>
 
-    <div id="transacaoModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="transacaoModalTitle">Nova Transação</h2>
-                <span class="close" onclick="closeModal('transacaoModal')">&times;</span>
-            </div>
-            <form id="transacaoForm">
-                <input type="hidden" id="transacaoId">
-                <div class="form-group">
-                    <label>Tipo</label>
-                    <select id="transacaoTipo" required>
-                        <option value="receita">Receita</option>
-                        <option value="despesa">Despesa</option>
-                    </select>
-                </div>
-                <div class="form-group" id="clienteSelectGroup">
-                    <label>Cliente</label>
-                    <select id="transacaoCliente" required>
-                        <option value="">Selecione um cliente</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Descrição</label>
-                    <input type="text" id="transacaoDesc" placeholder="Ex: Corte + Barba" required>
-                </div>
-                <div class="grid-3">
-                    <div class="form-group">
-                        <label>Valor (R$)</label>
-                        <input type="number" id="transacaoValor" step="0.01" min="0" placeholder="50.00" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Data</label>
-                        <input type="date" id="transacaoData" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Pagamento</label>
-                        <select id="transacaoPagamento">
-                            <option value="dinheiro">Dinheiro</option>
-                            <option value="pix">PIX</option>
-                            <option value="cartao">Cartão</option>
-                        </select>
-                    </div>
-                </div>
-                <button type="submit" class="btn" id="transacaoSubmitBtn">Registrar Transação</button>
-            </form>
-        </div>
-    </div>
+  <script>
+    const STORAGE_KEYS = {
+      clientes: 'trevoCashbackClientesV2',
+      movimentacoes: 'trevoCashbackMovimentacoesV2',
+      eventos: 'trevoCashbackEventosV2',
+      config: 'trevoCashbackConfigV2'
+    };
 
-    <div id="perfilModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="perfilNome">Perfil do Cliente</h2>
-                <span class="close" onclick="closeModal('perfilModal')">&times;</span>
-            </div>
-            <div id="perfilConteudo"></div>
-        </div>
-    </div>
+    let clientes = carregarJSON(STORAGE_KEYS.clientes, []);
+    let movimentacoes = carregarJSON(STORAGE_KEYS.movimentacoes, []);
+    let eventosAuditoria = carregarJSON(STORAGE_KEYS.eventos, []);
+    let clienteAtual = null;
 
-    <script>
-        // Firebase Config
-        const firebaseConfig = {
-          apiKey: "AIzaSyA6qSIIFzD2h4DYDTP_Nn52aG5ed65WBSM",
-          authDomain: "bancoteste-e7e18.firebaseapp.com",
-          projectId: "bancoteste-e7e18",
-          storageBucket: "bancoteste-e7e18.firebasestorage.app",
-          messagingSenderId: "400395068188",
-          appId: "1:400395068188:web:dc5c0c78c16053fdcf90d9"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
-        let transacoes = [];
-        let clientes = [];
-        let financeChart = null;
-        let filtroDashboardDias = 30;
-
-// --- CONFIGURAÇÃO DE MENSAGENS E CRM ---
-const MSG_DEFAULT = "Olá {{nome}}, tudo bem? Notamos que faz um tempo que não nos visita. Que tal agendar um horário?";
-
-function getTemplateCRM() {
-    return localStorage.getItem('crm_msg_template') || MSG_DEFAULT;
-}
-
-function salvarTemplateCRM() {
-    const segment = document.getElementById('crmSegmentSelect').value;
-    const msg = document.getElementById('crmTemplateMsg').value;
-    const templates = getTemplates();
-    
-    templates[segment] = msg;
-    localStorage.setItem(CRM_TEMPLATES_KEY, JSON.stringify(templates));
-    
-    alert('✅ Mensagem do segmento atualizada!');
-    closeModal('crmConfigModal');
-    renderCRM();
-}
-
-// Configuração de Mensagens
-const CRM_TEMPLATES_KEY = 'crm_templates_v2';
-const DEFAULT_TEXTS = {
-    aniversario: "Parabéns, {{nome}}! 🎂 Tudo bem? Passando para te desejar um feliz aniversário!",
-    inativos15: "Oi {{nome}}, tudo bem? Notamos que faz 15 dias que não nos visita...",
-    inativos30: "Olá {{nome}}! Já faz 30 dias que você veio aqui. Vamos agendar?",
-    queda: "Oi {{nome}}, tudo certo? Notamos que você está demorando um pouco mais para vir...",
-    churn: "Olá {{nome}}, sentimos sua falta! Preparamos uma condição especial para sua volta."
-};
-
-function getTemplates() {
-    const saved = localStorage.getItem(CRM_TEMPLATES_KEY);
-    return saved ? JSON.parse(saved) : DEFAULT_TEXTS;
-}
-
-// Atualiza o texto do modal quando muda o segmento
-document.getElementById('crmSegmentSelect').addEventListener('change', function() {
-    const segment = this.value;
-    const templates = getTemplates();
-    document.getElementById('crmTemplateMsg').value = templates[segment] || "";
-});
-
-// Salva a mensagem no LocalStorage
-function salvarTemplateCRM() {
-    const segment = document.getElementById('crmSegmentSelect').value;
-    const msg = document.getElementById('crmTemplateMsg').value;
-    const templates = getTemplates();
-    templates[segment] = msg;
-    localStorage.setItem(CRM_TEMPLATES_KEY, JSON.stringify(templates));
-    alert("Mensagem salva com sucesso!");
-    closeModal('crmConfigModal');
-}
-
-function renderCRM() {
-    const hoje = new Date();
-    const mesAtual = hoje.getMonth() + 1;
-    const diaAtual = hoje.getDate();
-    
-    // Arrays para cada categoria
-    const inativos15 = [];
-    const inativos30 = [];
-    const listaQueda = [];
-    const listaChurn = [];
-
-    clientes.forEach(c => {
-        const visitas = getVisitasCliente(c.id);
-        if (visitas.length === 0) return;
-
-        const ultimaVisita = parseDateFortaleza(visitas[visitas.length - 1].data);
-        const diasInativo = Math.floor((hoje - ultimaVisita) / (1000 * 60 * 60 * 24));
-        
-        if (diasInativo >= 45) {
-            listaChurn.push({ ...c, diasInativo });
-        } else if (diasInativo >= 30) {
-            inativos30.push({ ...c, diasInativo });
-        } else if (diasInativo >= 15) {
-            inativos15.push({ ...c, diasInativo });
-        }
-
-        const freq = calcularTaxaFrequencia(visitas);
-        if (freq && diasInativo > (freq * 1.5) && diasInativo < 15) {
-            listaQueda.push({ ...c, diasInativo, freqMedia: Math.floor(freq) });
-        }
+    let configuracoes = carregarJSON(STORAGE_KEYS.config, {
+      percentualCashback: 5,
+      validadeCashback: 30,
+      valorMinimoGerar: 20,
+      saldoMinimoUso: 5,
+      limiteUsoPorCompra: 50,
+      googleScriptUrl: ''
     });
 
-    // 1. Filtrar e ORDENAR Aniversariantes por dia
-    const aniversariantes = clientes
-        .filter(c => {
-            if (!c.dataNascimento) return false;
-            return parseInt(c.dataNascimento.split('-')[1]) === mesAtual;
-        })
-        .sort((a, b) => {
-            const diaA = parseInt(a.dataNascimento.split('-')[2]);
-            const diaB = parseInt(b.dataNascimento.split('-')[2]);
-            return diaA - diaB;
-        });
-
-    // 2. Renderizar cada lista e atualizar os badges
-    renderizarListaCRM('listaAniversariantes', aniversariantes, 'aniversario', diaAtual);
-    renderizarListaCRM('listaInativos15', inativos15, 'inativos15');
-    renderizarListaCRM('listaInativos30', inativos30, 'inativos30');
-    renderizarListaCRM('listaQuedaFrequencia', listaQueda, 'queda');
-    renderizarListaCRM('listaChurn', listaChurn, 'churn');
-}
-
-function renderizarListaCRM(idElemento, dados, segmentKey, diaAtual = null) {
-    const lista = document.getElementById(idElemento);
-    
-    // Lógica corrigida para encontrar o badge e somar as notificações
-    const badgeMap = {
-        'listaAniversariantes': 'badge-aniversario',
-        'listaInativos15': 'badge-inativos15',
-        'listaInativos30': 'badge-inativos30',
-        'listaQuedaFrequencia': 'badge-frequencia',
-        'listaChurn': 'badge-churn'
-    };
-    
-    const badge = document.getElementById(badgeMap[idElemento]);
-    if (badge) {
-        badge.innerText = dados.length;
-        badge.style.display = dados.length > 0 ? 'block' : 'none';
+    function carregarJSON(chave, fallback) {
+      try { return JSON.parse(localStorage.getItem(chave)) || fallback; }
+      catch { return fallback; }
     }
 
-    if (!lista) return;
-    
-    if (dados.length === 0) {
-        lista.innerHTML = '<li style="color: #636366; padding: 15px; font-size: 0.85em;">Nenhum cliente detectado nesta categoria.</li>';
+    function salvarBancoLocal() {
+      localStorage.setItem(STORAGE_KEYS.clientes, JSON.stringify(clientes));
+      localStorage.setItem(STORAGE_KEYS.movimentacoes, JSON.stringify(movimentacoes));
+      localStorage.setItem(STORAGE_KEYS.eventos, JSON.stringify(eventosAuditoria));
+      atualizarMetricas();
+      atualizarSelectClientes();
+    }
+
+    function registrarEvento(tipo, dados, origem = 'sistema') {
+      const evento = {
+        eventoId: gerarId(),
+        tipo,
+        origem,
+        data: hojeTexto(),
+        timestamp: Date.now(),
+        dados
+      };
+      eventosAuditoria.push(evento);
+      localStorage.setItem(STORAGE_KEYS.eventos, JSON.stringify(eventosAuditoria));
+      enviarParaGoogleSheets(evento);
+      return evento;
+    }
+
+    function escaparHTML(valor) {
+      return String(valor ?? '').replace(/[&<>'"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
+    }
+    function formatarMoeda(valor) { return Number(valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
+    function limparTelefone(telefone) { return String(telefone || '').replace(/\D/g, ''); }
+    function formatarTelefone(telefone) {
+      const t = limparTelefone(telefone).slice(0, 11);
+      if (t.length <= 2) return t;
+      if (t.length <= 7) return `(${t.slice(0,2)}) ${t.slice(2)}`;
+      return `(${t.slice(0,2)}) ${t.slice(2,7)}-${t.slice(7)}`;
+    }
+    function mascararTelefoneInput(input) { input.value = formatarTelefone(input.value); }
+    function hojeTexto() { return new Date().toLocaleString('pt-BR'); }
+    function gerarId() { return Date.now().toString(36) + Math.random().toString(36).substring(2); }
+    function dataISOHoje() { return new Date().toISOString().slice(0,10); }
+    function somarDiasISO(dataISO, dias) {
+      const d = new Date(dataISO + 'T00:00:00');
+      d.setDate(d.getDate() + Number(dias || 0));
+      return d.toISOString().slice(0,10);
+    }
+    function dataBR(dataISO) {
+      if (!dataISO) return '-';
+      const [a,m,d] = dataISO.split('-');
+      return `${d}/${m}/${a}`;
+    }
+
+    function abrirTela(id, botao) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      if (botao) botao.classList.add('active');
+      posAbrirTela(id);
+    }
+    function abrirTelaPorId(id) { abrirTela(id, document.querySelector(`.tab-btn[data-view="${id}"]`)); }
+    function posAbrirTela(id) {
+      recalcularTodosClientes();
+      if (id === 'clientes') renderizarClientes();
+      if (id === 'historico') renderizarHistorico();
+      if (id === 'vendas') { atualizarSelectClientes(); atualizarPreviaVenda(); }
+      if (id === 'config') carregarConfiguracoesNaTela();
+      if (id === 'aniversarios') renderizarAniversarios();
+    }
+
+    function mostrarToast(mensagem, tipo = 'success') {
+      const area = document.getElementById('toast');
+      const item = document.createElement('div');
+      item.className = `toast-item ${tipo}`;
+      item.innerHTML = mensagem;
+      area.appendChild(item);
+      setTimeout(() => item.remove(), 4300);
+    }
+    function confirmarAcao(titulo, mensagem, textoBotao, callback, tipo = 'danger') {
+      document.getElementById('modalTitulo').textContent = titulo;
+      document.getElementById('modalMensagem').innerHTML = mensagem;
+      const botao = document.getElementById('modalBotaoConfirmar');
+      botao.textContent = textoBotao;
+      botao.className = tipo;
+      botao.onclick = () => { fecharModal('modalConfirmacao'); callback(); };
+      document.getElementById('modalConfirmacao').classList.add('active');
+    }
+    function fecharModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    function atualizarMetricas() {
+      document.getElementById('metricClientes').textContent = clientes.length;
+      document.getElementById('metricVendas').textContent = movimentacoes.filter(m => m.status !== 'cancelado').length;
+      const saldoTotal = clientes.reduce((soma, c) => soma + Number(c.saldo || 0), 0);
+      document.getElementById('metricSaldo').textContent = formatarMoeda(saldoTotal);
+    }
+    function enterParaConsultar(event) { if (event.key === 'Enter') consultarCliente(); }
+
+    function carregarConfiguracoesNaTela() {
+      document.getElementById('percentualCashback').value = configuracoes.percentualCashback;
+      document.getElementById('validadeCashback').value = configuracoes.validadeCashback;
+      document.getElementById('valorMinimoGerar').value = configuracoes.valorMinimoGerar;
+      document.getElementById('saldoMinimoUso').value = configuracoes.saldoMinimoUso;
+      document.getElementById('limiteUsoPorCompra').value = configuracoes.limiteUsoPorCompra;
+      document.getElementById('googleScriptUrl').value = configuracoes.googleScriptUrl || '';
+    }
+    function confirmarSalvarConfiguracoes() {
+      confirmarAcao('Salvar configurações', 'As novas regras serão aplicadas nas próximas vendas. Deseja continuar?', 'Salvar', salvarConfiguracoes, 'success');
+    }
+    function salvarConfiguracoes() {
+      const nova = {
+        percentualCashback: Number(document.getElementById('percentualCashback').value || 0),
+        validadeCashback: Number(document.getElementById('validadeCashback').value || 30),
+        valorMinimoGerar: Number(document.getElementById('valorMinimoGerar').value || 0),
+        saldoMinimoUso: Number(document.getElementById('saldoMinimoUso').value || 0),
+        limiteUsoPorCompra: Number(document.getElementById('limiteUsoPorCompra').value || 0),
+        googleScriptUrl: document.getElementById('googleScriptUrl').value.trim()
+      };
+      if (nova.percentualCashback < 0 || nova.percentualCashback > 100 || nova.limiteUsoPorCompra < 0 || nova.limiteUsoPorCompra > 100 || nova.validadeCashback <= 0) {
+        mostrarToast('Revise os percentuais e a validade. Os percentuais devem estar entre 0 e 100.', 'warning');
         return;
-    }
-
-    lista.innerHTML = dados.map(c => {
-        let labelInfo = `${c.diasInativo || 0} dias de ausência`;
-        let extraClass = "";
-
-        if (segmentKey === 'aniversario') {
-            const diaAniv = parseInt(c.dataNascimento.split('-')[2]);
-            labelInfo = `Aniversário dia ${diaAniv}`;
-            if (diaAniv === diaAtual) {
-                extraClass = "card-aniversario-hoje";
-                labelInfo = "✨ HOJE É O ANIVERSÁRIO!";
-            }
-        }
-
-        return `
-            <li class="list-item ${extraClass}" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: ${extraClass ? 'none' : '1px solid #2c2c2e'};">
-                <div>
-                    <div class="crm-customer-name" style="color: #fff; font-weight: 500; font-size: 1.05em;">${c.nome}</div>
-                    <div style="color: #8e8e93; font-size: 0.85em; margin-top: 2px;">${labelInfo}</div>
-                </div>
-                <button class="btn-whatsapp-ghost" onclick="enviarWhats('${c.telefone}', '${c.nome}', '${segmentKey}')">
-                    <i class="fab fa-whatsapp"></i> WhatsApp
-                </button>
-            </li>
-        `;
-    }).join('');
-}
-
-// Toggle dos backdrops CRM ATIVO
-function toggleCRMSection(id) {
-    const section = document.getElementById(id);
-    section.classList.toggle('active');
-}
-
-// CORREÇÃO DO WHATSAPP (Remove caracteres estranhos)
-function enviarWhats(telefone, nome, segmentKey) {
-    if (!telefone) return alert("Telefone não cadastrado.");
-    
-    const telLimpo = telefone.replace(/\D/g, '');
-    const templates = getTemplates();
-    
-    // Pega o template e limpa espaços extras ou quebras de linha problemáticas
-    let msgBase = templates[segmentKey] || DEFAULT_TEXTS[segmentKey];
-    
-    // Substitui o nome (primeiro nome apenas para ser mais pessoal)
-    const primeiroNome = nome.split(' ')[0];
-    let msgFinal = msgBase.replace(/{{nome}}/g, primeiroNome);
-
-    // Codificação segura para URL (resolve o problema do caractere estranho)
-    const link = `https://api.whatsapp.com/send?phone=55${telLimpo}&text=${encodeURIComponent(msgFinal)}`;
-    
-    window.open(link, '_blank');
-}
-
-// --- BUSCA DINÂMICA COM FILTRO ---
-function filtrarClientes() {
-    const termo = document.getElementById('clienteSearch').value.toLowerCase();
-    const filtrados = clientes.filter(c => 
-        (c.nome && c.nome.toLowerCase().includes(termo)) || 
-        (c.documento && c.documento.toLowerCase().includes(termo))
-    );
-    
-    const list = document.getElementById('clientesList');
-    list.innerHTML = filtrados.map(c => `
-        <li class="list-item">
-            <div><strong>${c.nome}</strong><br><small>${c.telefone}</small></div>
-            <div class="list-item-actions">
-                <button class="btn btn-small" onclick="verPerfil('${c.id}')">Ver Perfil</button>
-                <button class="btn btn-danger btn-small" onclick="deletarCliente('${c.id}')"><i class="fas fa-trash"></i></button>
-            </div>
-        </li>
-    `).join('');
-}
-
-// Adicionar o evento de digitação na busca
-document.getElementById('clienteSearch').addEventListener('input', filtrarClientes);
-
-// Inicialização do Firebase e Listeners
-function init() {
-    db.collection('clientes').onSnapshot(snap => {
-        clientes = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
-        renderClientes();
-    });
-
-    db.collection('transacoes').onSnapshot(snap => {
-        transacoes = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
-        updateDashboard();
-        renderFinanceiro();
-    });
-}
-init();
-
-        // --- LÓGICA DE FUSO HORÁRIO FORTALEZA-CE ---
-
-        /** * Retorna a data atual no fuso de Fortaleza em formato YYYY-MM-DD
-         */
-        function getFortalezaDate(date = new Date()) {
-            return new Intl.DateTimeFormat('fr-CA', {
-                timeZone: 'America/Fortaleza',
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit'
-            }).format(date);
-        }
-
-        /**
-         * Converte uma string YYYY-MM-DD para um objeto Date considerando o fuso -03:00
-         */
-        function parseDateFortaleza(dateStr) {
-        if (!dateStr) return null;
-            // Extrai só a parte YYYY-MM-DD da string ISO
-            const datePart = dateStr.split('T')[0];
-            return new Date(datePart + 'T00:00:00-03:00');
-        }
-        // --- NAVEGAÇÃO E MODAIS ---
-
-        function switchTab(tabName, element) {
-            document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            document.getElementById(tabName).style.display = 'block';
-            element.classList.add('active');
-            
-            if(tabName === 'dashboard') updateDashboard();
-            if(tabName === 'crm') renderCRM('todos');
-            if(tabName === 'financeiro') renderFinanceiro();
-        }
-
-        function openModal(id) {
-            document.getElementById(id).style.display = 'block';
-            if(id === 'transacaoModal') {
-                populateClienteSelect();
-                atualizarCampoCliente(); // Garante as travas de data ao abrir
-            }
-        }
-
-        function closeModal(id) {
-            document.getElementById(id).style.display = 'none';
-            if(id === 'transacaoModal') {
-                document.getElementById('transacaoForm').reset();
-                document.getElementById('transacaoId').value = '';
-                document.getElementById('transacaoModalTitle').textContent = 'Nova Transação';
-                document.getElementById('transacaoSubmitBtn').textContent = 'Registrar Transação';
-                
-                // Reset das travas de input
-                const dataInput = document.getElementById('transacaoData');
-                dataInput.readOnly = false;
-                dataInput.value = getFortalezaDate();
-            }
-        }
-
-        window.onclick = function(event) {
-            if (event.target.classList.contains('modal')) {
-                const modalId = event.target.id;
-                closeModal(modalId);
-            }
-        }
-
-        // --- UTILITÁRIOS ---
-
-        function formatMoney(value) {
-            return `R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-        }
-
-        function diasEntre(a, b) {
-            const diff = b - a;
-            return Math.floor(diff / (1000 * 60 * 60 * 24));
-        }
-
-        function calcularIdade(dataNascimentoStr) {
-            if (!dataNascimentoStr) return null;
-            const [ano, mes, dia] = dataNascimentoStr.split('-').map(Number);
-            const hojeStr = getFortalezaDate();
-            const hoje = parseDateFortaleza(hojeStr);
-            let idade = hoje.getFullYear() - ano;
-            const m = (hoje.getMonth() + 1) - mes;
-            if (m < 0 || (m === 0 && hoje.getDate() < dia)) idade--;
-            return idade;
-        }
-
-        // --- CLIENTES ---
-
-function renderClientes() {
-    const list = document.getElementById('clientesList');
-    if (clientes.length === 0) {
-        list.innerHTML = `<li class="list-item"><div><strong>Nenhum cliente cadastrado</strong></div></li>`;
-        return;
-    }
-
-    list.innerHTML = clientes.map(c => `
-        <li class="list-item">
-            <div>
-                <strong>${c.nome}</strong><br>
-                <small><i class="fab fa-whatsapp"></i> ${c.telefone}</small>
-            </div>
-            <div class="list-item-actions">
-                <button class="btn btn-small" onclick="verPerfil('${c.id}')">Ver Perfil</button>
-                <button class="btn btn-danger btn-small" onclick="deletarCliente('${c.id}')">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-        </li>
-    `).join('');
-}
-
- document.getElementById('clienteForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const nome = document.getElementById('clienteNome').value.trim();
-    const telefone = document.getElementById('clienteTelefone').value.trim();
-    const nascimento = document.getElementById('clienteNascimento').value || null;
-    const observacoes = document.getElementById('clienteObs').value;
-
-    // VERIFICAÇÃO DE DUPLICADO
-    const clienteExistente = clientes.find(c => 
-        c.nome.toLowerCase() === nome.toLowerCase() || 
-        c.telefone === telefone
-    );
-
-    if (clienteExistente) {
-        alert(`⚠️ Atenção: Já existe um cliente cadastrado com este nome ou telefone (${clienteExistente.nome}).`);
-        return; // Interrompe o cadastro
-    }
-
-    const novoCliente = {
-        nome: nome,
-        telefone: telefone,
-        dataNascimento: nascimento,
-        observacoes: observacoes,
-        dataCadastro: new Date().toISOString(),
-        ultimoContatoCRM: null
-    };
-
-    try {
-        await db.collection('clientes').add(novoCliente);
-        alert('✅ Cliente cadastrado com sucesso!');
-        e.target.reset();
-        closeModal('clienteModal');
-    } catch (error) {
-        console.error("Erro ao cadastrar:", error);
-        alert('Erro ao salvar no banco de dados.');
-    }
-});
-
-        // --- TRANSAÇÕES (LÓGICA PRINCIPAL DE TRAVAS) ---
-
-        function populateClienteSelect() {
-            const select = document.getElementById('transacaoCliente');
-            select.innerHTML = '<option value="">Selecione um cliente</option>' +
-                clientes.map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
-        }
-
-        /**
-         * Implementa a trava de data para Receitas e libera para Despesas
-         */
-        function atualizarCampoCliente() {
-            const tipo = document.getElementById('transacaoTipo').value;
-            const clienteGroup = document.getElementById('clienteSelectGroup');
-            const dataInput = document.getElementById('transacaoData');
-            
-            if (tipo === 'receita') {
-                clienteGroup.style.display = 'block';
-                document.getElementById('transacaoCliente').required = true;
-                
-                // TRAVA: Receita sempre hoje (Fortaleza) e não editável
-                dataInput.value = getFortalezaDate();
-                dataInput.readOnly = true;
-            } else {
-                clienteGroup.style.display = 'none';
-                document.getElementById('transacaoCliente').required = false;
-                
-                // Despesa: Pode alterar data
-                dataInput.readOnly = false;
-            }
-        }
-
-        document.getElementById('transacaoTipo').addEventListener('change', atualizarCampoCliente);
-
-        document.getElementById('transacaoForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const tipo = document.getElementById('transacaoTipo').value;
-            const transacaoId = document.getElementById('transacaoId').value;
-            const clienteId = document.getElementById('transacaoCliente').value;
-            const dataEscolhida = document.getElementById('transacaoData').value;
-
-            // VALIDAÇÃO: Data da transação não pode ser anterior ao cadastro do cliente
-            if (tipo === 'receita' && clienteId) {
-                const cliente = clientes.find(c => c.id === clienteId);
-                if (cliente && cliente.dataCadastro) {
-                    if (dataEscolhida < cliente.dataCadastro) {
-                        alert(`Erro: A data da transação (${dataEscolhida}) não pode ser anterior à data de cadastro do cliente (${cliente.dataCadastro}).`);
-                        return;
-                    }
-                }
-            }
-
-            const dados = {
-                tipo: tipo,
-                clienteId: tipo === 'receita' ? clienteId : null,
-                descricao: document.getElementById('transacaoDesc').value,
-                valor: parseFloat(document.getElementById('transacaoValor').value),
-                data: dataEscolhida,
-                pagamento: document.getElementById('transacaoPagamento').value,
-                timestamp: new Date().toISOString()
-            };
-
-            if (transacaoId) {
-                await db.collection('transacoes').doc(transacaoId).update(dados);
-            } else {
-                await db.collection('transacoes').add(dados);
-            }
-
-            e.target.reset();
-            closeModal('transacaoModal');
-        });
-
-        // --- DASHBOARD E FINANCEIRO ---
-
-        function updateDashboard() {
-            const hojeFortalezaStr = getFortalezaDate();
-            const agora = parseDateFortaleza(hojeFortalezaStr);
-            
-            const inicioFiltro = new Date(agora.getTime());
-            inicioFiltro.setDate(agora.getDate() - (filtroDashboardDias - 1));
-
-            // Filtro de Transações
-            const estePeriodo = transacoes.filter(t => {
-                const dt = parseDateFortaleza(t.data);
-                return t.tipo === 'receita' && dt >= inicioFiltro && dt <= agora;
-            });
-
-            const total = estePeriodo.reduce((acc, t) => acc + Number(t.valor || 0), 0);
-            const media = estePeriodo.length > 0 ? total / estePeriodo.length : 0;
-
-            // Filtro de Novos Clientes (usando a dataCadastro gravada em Fortaleza)
-            const novos = clientes.filter(c => {
-                const dt = parseDateFortaleza(c.dataCadastro);
-                return dt >= inicioFiltro && dt <= agora;
-            }).length;
-
-            // --- calcular período anterior ---
-            const periodoDias = filtroDashboardDias;
-            const prevFim = new Date(inicioFiltro.getTime() - (1000 * 60 * 60 * 24)); // dia anterior ao inicioFiltro
-            const prevInicio = new Date(prevFim.getTime());
-            prevInicio.setDate(prevFim.getDate() - (periodoDias - 1));
-
-            // Helper para comparar com formato YYYY-MM-DD (sua lógica usa t.data string YYYY-MM-DD)
-            function inRangeDateStr(dateStr, startDate, endDate) {
-            const d = parseDateFortaleza(dateStr); // já converte pra Date no fuso
-            return d >= startDate && d <= endDate;
-            }
-
-            // Calcular valores do período anterior
-            const prevPeriodo = transacoes.filter(t => t.tipo === 'receita' && inRangeDateStr(t.data, prevInicio, prevFim));
-            const prevTotal = prevPeriodo.reduce((acc, t) => acc + Number(t.valor || 0), 0);
-            const prevCount = prevPeriodo.length;
-            const prevMedia = prevCount > 0 ? prevTotal / prevCount : 0;
-
-            const prevVisitas = prevCount;
-
-            // Novos clientes no período anterior
-            const prevNovos = clientes.filter(c => {
-            if (!c.dataCadastro) return false;
-            const dt = parseDateFortaleza(c.dataCadastro);
-            return dt >= prevInicio && dt <= prevFim;
-            }).length;
-
-            // --- setar os deltas nos cards ---
-            setDelta('receitaMes', total, prevTotal, { isCurrency: true });
-            setDelta('ticketMedio', media, prevMedia, { isCurrency: true });
-            setDelta('totalVisitas', estePeriodo.length, prevVisitas, { isCurrency: false });
-            setDelta('novosClientes', novos, prevNovos, { isCurrency: false });
-
-            document.getElementById('receitaMes').textContent = formatMoney(total);
-            document.getElementById('ticketMedio').textContent = formatMoney(media);
-            document.getElementById('totalVisitas').textContent = estePeriodo.length;
-            document.getElementById('novosClientes').textContent = novos;
-
-            renderChart(estePeriodo, inicioFiltro, agora);
-            renderDiasMovimento(estePeriodo);
-            renderFormasPagamento(estePeriodo);
-            renderTopClientes(inicioFiltro, agora);
-        }
-
-        
-
-        function setFiltroDashboard(dias) {
-            filtroDashboardDias = dias;
-            document.querySelectorAll('.filter-buttons .btn').forEach(b => {
-                b.classList.remove('btn-secondary');
-                b.classList.add('btn-small');
-            });
-            event.target.classList.add('btn-secondary');
-            updateDashboard();
-        }
-// Função para abrir o modal de detalhes do delta (detalhes do cálculo dos cards KPI DO DASHBOARD)
-function abrirModalDetalhes(cardId, current, previous, isCurrency = false) {
-  const modal = document.getElementById('detalhesModal');
-  const conteudo = document.getElementById('detalhesConteudo');
-
-  const diff = current - previous;
-  const diffAbs = Math.abs(diff);
-  const sinal = diff >= 0 ? '+' : '-';
-
-  const formatVal = (val) => isCurrency ? formatMoney(val) : val;
-
-  conteudo.innerHTML = `
-    <p><strong>Valor atual:</strong> ${formatVal(current)}</p>
-    <p><strong>Valor anterior:</strong> ${formatVal(previous)}</p>
-    <p><strong>Diferença:</strong> ${sinal} ${formatVal(diffAbs)}</p>
-  `;
-
-  modal.style.display = 'block';
-}
-
-function fecharModalDetalhes() {
-  document.getElementById('detalhesModal').style.display = 'none';
-}
-
-// Fecha modal ao clicar fora do conteúdo
-window.addEventListener('click', (e) => {
-  const modal = document.getElementById('detalhesModal');
-  if (e.target === modal) {
-    fecharModalDetalhes();
-  }
-});
-
-        // Formata percentuais com 1 casa CARTÕES ESTILO IFOOD NO DASHBOARD ---
-function formatPercent(v) {
-  return (Math.abs(v)).toFixed(1) + '%';
-}
-
-// Insere/atualiza o delta abaixo do elementId (que já contém o valor principal)
-function setDelta(elementId, current, previous, options = {}) {
-  // options: {isCurrency: boolean, label: 'texto opcional'}
-  const el = document.getElementById(elementId);
-  if (!el) return;
-
-  // remove delta antigo se existir
-  const parent = el.parentElement;
-  const existing = parent.querySelector('.delta');
-  if (existing) existing.remove();
-
-  let deltaDiv = document.createElement('div');
-  let cls = 'delta neutral';
-  let iconHtml = `<span class="icon">—</span>`;
-  let text = '—';
-
-  if (previous === 0) {
-    if (current === 0) {
-      cls = 'delta neutral';
-      iconHtml = `<span class="icon">—</span>`;
-      text = 'Sem dados anteriores';
-    } else {
-      cls = 'delta up';
-      iconHtml = `<span class="icon"><i class="fas fa-arrow-up"></i></span>`;
-      text = 'Novo';
-      if (options.isCurrency) text += ` · ${formatMoney(current)}`;
-      else text += ` · ${current}`;
-    }
-  } else {
-    const diff = current - previous;
-    const pct = (diff / previous) * 100;
-    if (diff > 0) {
-      cls = 'delta up';
-      iconHtml = `<span class="icon"><i class="fas fa-arrow-up"></i></span>`;
-      text = `${formatPercent(pct)} vs período anterior`;
-    } else if (diff < 0) {
-      cls = 'delta down';
-      iconHtml = `<span class="icon"><i class="fas fa-arrow-down"></i></span>`;
-      text = `${formatPercent(pct)} vs período anterior`;
-    } else {
-      cls = 'delta neutral';
-      iconHtml = `<span class="icon">—</span>`;
-      text = 'Sem variação';
-    }
-  }
-
-  deltaDiv.className = cls;
-deltaDiv.innerHTML = `
-  ${iconHtml}<span>${text}</span>
-  <button class="btn-info" style="margin-left:8px; font-size:12px; background:none; border:none; color:inherit; cursor:pointer;" 
-    onclick="abrirModalDetalhes('${elementId}', ${current}, ${previous}, ${options.isCurrency})" title="Ver detalhes">
-    <i class="fas fa-info-circle"></i>
-  </button>
-`;
-  parent.appendChild(deltaDiv);
-}
-
-        function renderChart(estePeriodo, inicioFiltro, agora) {
-            const ctx = document.getElementById('financeChart').getContext('2d');
-            if (financeChart) financeChart.destroy();
-
-            const labels = [];
-            const valores = [];
-
-            for (let i = 0; i < filtroDashboardDias; i++) {
-                const dia = new Date(inicioFiltro.getTime());
-                dia.setDate(inicioFiltro.getDate() + i);
-                
-                const diaStr = dia.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-                labels.push(diaStr);
-                
-                const dataIso = getFortalezaDate(dia);
-                const valorDia = estePeriodo
-                    .filter(t => t.data === dataIso)
-                    .reduce((acc, t) => acc + Number(t.valor || 0), 0);
-                
-                valores.push(valorDia);
-            }
-
-            financeChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Faturamento',
-                        data: valores,
-                        borderColor: '#c5a059',
-                        tension: 0.4,
-                        fill: true,
-                        backgroundColor: 'rgba(197, 160, 89, 0.1)'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { grid: { color: '#2c3138' }, ticks: { color: '#a0a0a0' } },
-                        x: { grid: { display: false }, ticks: { color: '#a0a0a0' } }
-                    }
-                }
-            });
-        }
-
-// -----------------------------
-// renderFinanceiro atualizado para respeitar filtros de data e tipo
-// -----------------------------
-function renderFinanceiro() {
-  const hojeStr = getFortalezaDate();
-  const hoje = parseDateFortaleza(hojeStr);
-
-  // Lê filtros da UI
-  const filtroInicio = document.getElementById('filtroDataInicio').value; // YYYY-MM-DD ou ''
-  const filtroFim = document.getElementById('filtroDataFim').value;
-  const filtroTipo = document.getElementById('filtroTipo') ? document.getElementById('filtroTipo').value : 'todas';
-
-  // Base: considera transacoes como array global atualizado pelo snapshot do Firestore
-  let base = [...transacoes];
-
-  // Se houver filtro por mês original (mantive a lógica para os totais do mês atual)
-  // Mas quando filtros manuais estiverem setados, calculamos total com base neles.
-  // Primeiro, aplica filtros de data se houverem
-  if (filtroInicio) {
-    base = base.filter(t => t.data >= filtroInicio);
-  }
-  if (filtroFim) {
-    base = base.filter(t => t.data <= filtroFim);
-  }
-
-  // Aplica filtro por tipo (receita/despesa/todas)
-  if (filtroTipo && filtroTipo !== 'todas') {
-    base = base.filter(t => t.tipo === filtroTipo);
-  }
-
-  // Para exibir totais (se filtros estiverem ativos, exibe sobre o intervalo filtrado;
-  // caso contrário, exibe mês atual como antes)
-  let receitas = 0, despesas = 0;
-  if (filtroInicio || filtroFim || (filtroTipo && filtroTipo !== 'todas')) {
-    // Totais com base no conjunto filtrado 'base'
-    receitas = base.filter(t => t.tipo === 'receita').reduce((acc, t) => acc + Number(t.valor || 0), 0);
-    despesas = base.filter(t => t.tipo === 'despesa').reduce((acc, t) => acc + Number(t.valor || 0), 0);
-  } else {
-    // comportamento anterior: total do mês atual
-    const esteMes = transacoes.filter(t => {
-      const dt = parseDateFortaleza(t.data);
-      return dt.getMonth() === hoje.getMonth() && dt.getFullYear() === hoje.getFullYear();
-    });
-    receitas = esteMes.filter(t => t.tipo === 'receita').reduce((acc, t) => acc + Number(t.valor || 0), 0);
-    despesas = esteMes.filter(t => t.tipo === 'despesa').reduce((acc, t) => acc + Number(t.valor || 0), 0);
-  }
-
-  document.getElementById('totalReceitas').textContent = formatMoney(receitas);
-  document.getElementById('totalDespesas').textContent = formatMoney(despesas);
-  document.getElementById('lucroLiquido').textContent = formatMoney(receitas - despesas);
-
-  // Lista de transações: ordena pelo campo data/timestamp e limita
-  const ordenadas = base
-    .sort((a, b) => {
-      if (b.data !== a.data) return b.data.localeCompare(a.data);
-      return (b.timestamp || '').localeCompare(a.timestamp || '');
-    })
-    .slice(0, 200); // limite ampliado
-
-  const list = document.getElementById('transacoesList');
-  list.innerHTML = ordenadas.map(t => {
-    const cliente = t.clienteId ? clientes.find(c => c.id === t.clienteId) : null;
-    const dataFormat = (t.data || '').split('-').reverse().join('/');
-    const tipoBadge = t.tipo === 'receita' ? 'badge-success' : 'badge-danger';
-    const sinal = t.tipo === 'receita' ? '+' : '-';
-    return `
-      <li class="list-item">
-        <div>
-          <strong>${t.descricao || '—'}</strong><br>
-          <small>${dataFormat} · ${cliente ? cliente.nome : 'Geral'} · ${t.pagamento || ''}</small>
-        </div>
-        <div class="list-item-actions">
-          <span class="badge ${tipoBadge}">
-            ${sinal} ${formatMoney(t.valor)}
-          </span>
-          <button class="btn btn-danger btn-small" onclick="deletarTransacao('${t.id}')">
-            <i class="fas fa-trash"></i>
-          </button>
-        </div>
-      </li>
-    `;
-  }).join('');
-}
-// -----------------------------
-// Funções de filtro -------------------------------------------------------FINANCEIRO--------------------------------/ UI para Transações
-// -----------------------------
-function toggleDropdownMenu(e) {
-  e.stopPropagation();
-  const dd = document.querySelector('.dropdown');
-  dd.classList.toggle('open');
-}
-
-// Fecha dropdown ao clicar fora
-document.addEventListener('click', () => {
-  const dd = document.querySelector('.dropdown');
-  if (dd) dd.classList.remove('open');
-});
-
-// Recolhe / Expande a seção de transações
-function toggleTransacoesSection() {
-  const card = document.getElementById('transacoesCard');
-  card.classList.toggle('collapsed');
-}
-
-// Aplica o filtro (lê os inputs e re-renderiza)
-function aplicarFiltroTransacoes() {
-  // apenas re-renderiza, renderFinanceiro usa os valores dos inputs
-  renderFinanceiro();
-}
-
-// Limpa os filtros e re-renderiza
-function limparFiltroTransacoes() {
-  document.getElementById('filtroDataInicio').value = '';
-  document.getElementById('filtroDataFim').value = '';
-  document.getElementById('filtroTipo').value = 'todas';
-  renderFinanceiro();
-}
-
-        // Funções de listagem auxiliares do Dashboard
-        function renderTopClientes(inicio, fim) {
-            const mapa = {};
-            transacoes.forEach(t => {
-                if(t.tipo !== 'receita' || !t.clienteId) return;
-                const dt = parseDateFortaleza(t.data);
-                if(dt >= inicio && dt <= fim) {
-                    if(!mapa[t.clienteId]) mapa[t.clienteId] = { total: 0, visitas: 0 };
-                    mapa[t.clienteId].total += t.valor;
-                    mapa[t.clienteId].visitas += 1;
-                }
-            });
-
-            const ranking = Object.entries(mapa)
-                .map(([id, info]) => ({ id, ...info, nome: clientes.find(c => c.id === id)?.nome || '???' }))
-                .sort((a, b) => b.total - a.total).slice(0, 3);
-
-            const list = document.getElementById('vipListShort');
-            list.innerHTML = ranking.length ? ranking.map((c, i) => `
-                <li class="list-item">
-                    <div><strong>${c.nome}</strong><br><small>${c.visitas} visitas · ${formatMoney(c.total)}</small></div>
-                    <span class="badge badge-gold">#${i+1}</span>
-                </li>
-            `).join('') : '<li class="list-item">Nenhum dado</li>';
-        }
-
-        function renderDiasMovimento(estePeriodo) {
-            const diasSemana = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
-            const mapa = {};
-            estePeriodo.forEach(t => {
-                const dia = diasSemana[parseDateFortaleza(t.data).getDay()];
-                if(!mapa[dia]) mapa[dia] = { visitas: 0, valor: 0 };
-                mapa[dia].visitas++;
-                mapa[dia].valor += t.valor;
-            });
-            const ranking = Object.entries(mapa).sort((a, b) => b.visitas - a.visitas).slice(0, 3);
-            document.getElementById('diasMovimento').innerHTML = ranking.map(([dia, info]) => `
-                <li class="list-item">
-                    <div><strong>${dia}</strong><br><small>${info.visitas} visitas</small></div>
-                    <span class="badge badge-gold">${formatMoney(info.valor)}</span>
-                </li>
-            `).join('');
-        }
-
-        function renderFormasPagamento(estePeriodo) {
-            const mapa = {};
-            estePeriodo.forEach(t => {
-                const f = t.pagamento || 'Outro';
-                if(!mapa[f]) mapa[f] = 0;
-                mapa[f] += t.valor;
-            });
-            document.getElementById('formasPagamento').innerHTML = Object.entries(mapa).map(([f, v]) => `
-                <li class="list-item">
-                    <div><strong>${f.toUpperCase()}</strong></div>
-                    <span class="badge badge-success">${formatMoney(v)}</span>
-                </li>
-            `).join('');
-        }
-
-async function deletarCliente(id) {
-    if (confirm('⚠️ Você tem certeza que deseja excluir este cliente? Todos os dados serão perdidos.')) {
-        try {
-            await db.collection('clientes').doc(id).delete();
-            alert('Cliente removido com sucesso.');
-        } catch (e) {
-            alert('Erro ao excluir cliente.');
-        }
-    }
-}
-
-async function deletarTransacao(id) {
-  if (!id) return;
-  if (!confirm('⚠️ Deseja excluir esta transação?')) return;
-
-  try {
-    await db.collection('transacoes').doc(id).delete();
-    alert('✅ Transação excluída com sucesso.');
-    // opcional: re-renderiza a lista para atualizar UI
-    renderFinanceiro();
-    updateDashboard();
-  } catch (err) {
-    console.error('Erro ao excluir transação:', err);
-    alert('Erro ao excluir transação. Veja o console para mais detalhes.');
-  }
-}
-
-        // --- INICIALIZAÇÃO ---
-
-        function init() {
-            db.collection('clientes').onSnapshot(snap => {
-                clientes = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
-                renderClientes();
-                updateDashboard();
-            });
-
-            db.collection('transacoes').onSnapshot(snap => {
-                transacoes = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
-                updateDashboard();
-                renderFinanceiro();
-            });
-        }
-
-        // CRM e Outras funções (mantidas conforme original com pequenos ajustes de data)
-        function getVisitasCliente(clienteId) {
-            return transacoes
-                .filter(t => t.clienteId === clienteId && t.tipo === 'receita')
-                .sort((a, b) => a.data.localeCompare(b.data));
-        }
-
-        function getIntervaloMedioDias(visitas) {
-            if (visitas.length < 2) return null;
-            let soma = 0;
-            for (let i = 1; i < visitas.length; i++) {
-                soma += diasEntre(parseDateFortaleza(visitas[i-1].data), parseDateFortaleza(visitas[i].data));
-            }
-            return soma / (visitas.length - 1);
-        }
-
-// Funções auxiliares para cálculo de KPIs e ranking
-function calcularRanking(clienteId) {
-    // Ordena clientes pelo total gasto e retorna a posição do cliente
-    const ranking = clientes.map(c => {
-        const visitasCliente = getVisitasCliente(c.id);
-        const totalGasto = visitasCliente.reduce((acc, v) => acc + v.valor, 0);
-        return { id: c.id, nome: c.nome, totalGasto };
-    }).sort((a, b) => b.totalGasto - a.totalGasto);
-
-    const pos = ranking.findIndex(c => c.id === clienteId);
-    return pos >= 0 ? pos + 1 : null;
-}
-
-function calcularTicketMedio(visitas) {
-    if (visitas.length === 0) return 0;
-    const total = visitas.reduce((acc, v) => acc + v.valor, 0);
-    return total / visitas.length;
-}
-
-function calcularTaxaFrequencia(visitas) {
-    if (visitas.length < 2) return null;
-    let somaDias = 0;
-    for (let i = 1; i < visitas.length; i++) {
-        const dt1 = parseDateFortaleza(visitas[i-1].data);
-        const dt2 = parseDateFortaleza(visitas[i].data);
-        somaDias += (dt2 - dt1) / (1000 * 60 * 60 * 24);
-    }
-    return somaDias / (visitas.length - 1);
-}
-
-// Função atualizada para abrir o modal de perfil com dashboard detalhado
-// --- FUNÇÃO PARA VER PERFIL (DESIGN ATUALIZADO) ---
-function verPerfil(clienteId) {
-    const cliente = clientes.find(c => c.id === clienteId);
-    if (!cliente) return;
-    
-    const visitas = getVisitasCliente(clienteId);
-    const totalGasto = visitas.reduce((acc, v) => acc + (Number(v.valor) || 0), 0);
-    const ticketMedio = visitas.length > 0 ? totalGasto / visitas.length : 0;
-    const taxaFrequencia = calcularTaxaFrequencia(visitas);
-    const taxaFrequenciaStr = taxaFrequencia ? `${taxaFrequencia.toFixed(0)} dias` : 'N/A';
-
-    // Helper para formatar datas de YYYY-MM-DD para DD/MM/YYYY
-    const formatarBR = (dataStr) => {
-        if (!dataStr || dataStr.includes('T')) { 
-            // Se a data estiver no formato estranho ou vazia, tenta limpar
-            const d = dataStr ? dataStr.split('T')[0] : null;
-            return d ? d.split('-').reverse().join('/') : 'Não informada';
-        }
-        return dataStr.split('-').reverse().join('/');
-    };
-
-    document.getElementById('perfilNome').textContent = "Perfil do Cliente";
-    document.getElementById('perfilConteudo').innerHTML = `
-        <div class="stats-grid" style="grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-            <div class="stat-card"><h3>TOTAL GASTO</h3><div class="value">${formatMoney(totalGasto)}</div></div>
-            <div class="stat-card"><h3>VISITAS</h3><div class="value">${visitas.length}</div></div>
-            <div class="stat-card"><h3>TICKET MÉDIO</h3><div class="value">${formatMoney(ticketMedio)}</div></div>
-            <div class="stat-card"><h3>FREQ. MÉDIA</h3><div class="value">${taxaFrequenciaStr}</div></div>
-        </div>
-        
-        <div class="card" style="border-left: 4px solid var(--primary); background: var(--accent); padding: 20px;">
-            <h2 style="font-size: 14px; color: var(--primary); margin-bottom: 15px; text-transform: uppercase;">Dados Cadastrais</h2>
-            <p style="margin-bottom: 8px;"><strong>Nome:</strong> ${cliente.nome}</p>
-            <p style="margin-bottom: 8px;"><strong>Telefone:</strong> ${cliente.telefone}</p>
-            <p style="margin-bottom: 15px;"><strong>Nascimento:</strong> ${formatarBR(cliente.dataNascimento)}</p>
-            
-            <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; font-size: 13px; color: var(--text-muted);">
-                <i class="fas fa-calendar-check"></i> Adicionado em - ${formatarBR(cliente.dataCadastro)}
-            </div>
-        </div>
-
-        <div style="margin-top: 15px; padding: 10px; font-size: 13px; color: var(--text-muted);">
-            <strong>Observações:</strong><br>
-            ${cliente.observacoes || 'Nenhuma observação registrada.'}
-        </div>
-    `;
-    openModal('perfilModal');
-}
-// Função para obter clientes aniversariantes do mês atual
-function getAniversariantes() {
-    const mesAtual = new Date().getMonth() + 1; // Janeiro = 0
-    return clientes.filter(c => {
-        if (!c.dataNascimento) return false;
-        const mesNascimento = parseInt(c.dataNascimento.split('-')[1], 10);
-        return mesNascimento === mesAtual;
-    });
-}
-
-// Função para calcular média e desvio padrão de frequências (em dias)
-function calcularMediaEDesvio(frequencias) {
-    if (frequencias.length === 0) return { media: 0, desvio: 0 };
-    const media = frequencias.reduce((a, b) => a + b, 0) / frequencias.length;
-    const variancia = frequencias.reduce((a, b) => a + Math.pow(b - media, 2), 0) / frequencias.length;
-    const desvio = Math.sqrt(variancia);
-    return { media, desvio };
-}
-
-// Função para obter clientes com queda de frequência
-function getQuedaFrequencia() {
-    const hoje = new Date();
-    const clientesComQueda = [];
-
-    clientes.forEach(cliente => {
-        const visitas = getVisitasCliente(cliente.id);
-        if (visitas.length < 2) return; // Não tem histórico suficiente
-
-        // Calcular intervalos entre visitas
-        const intervalos = [];
-        for (let i = 1; i < visitas.length; i++) {
-            const dt1 = parseDateFortaleza(visitas[i - 1].data);
-            const dt2 = parseDateFortaleza(visitas[i].data);
-            const diffDias = (dt2 - dt1) / (1000 * 60 * 60 * 24);
-            intervalos.push(diffDias);
-        }
-
-        const { media, desvio } = calcularMediaEDesvio(intervalos);
-        const ultimoContato = parseDateFortaleza(visitas[visitas.length - 1].data);
-        const diasDesdeUltimaVisita = (hoje - ultimoContato) / (1000 * 60 * 60 * 24);
-
-        if (diasDesdeUltimaVisita > media + 1.5 * desvio) {
-            clientesComQueda.push({
-                cliente,
-                diasDesdeUltimaVisita,
-                mediaFrequencia: media
-            });
-        }
-    });
-
-    return clientesComQueda;
-}
-
-// Função para obter clientes em risco de churn (score de recência)
-function getRiscoChurn(dormenciaDias = 30) {
-    const hoje = new Date();
-    return clientes.filter(cliente => {
-        const visitas = getVisitasCliente(cliente.id);
-        if (visitas.length === 0) return false;
-        const ultimoContato = parseDateFortaleza(visitas[visitas.length - 1].data);
-        const diasDesdeUltimoContato = (hoje - ultimoContato) / (1000 * 60 * 60 * 24);
-        return diasDesdeUltimoContato > dormenciaDias;
-    });
-
-// --- CONFIGURAÇÃO DE MENSAGENS ---
-const MSG_DEFAULT = "Olá {{nome}}, tudo bem? Notamos que faz um tempo que não nos visita e nem faz um pedido, estamos com saudades! Que tal almoçar conosco essa semana?";
-
-// --- TEMPLATES DEFAULT POR SEGMENTO ---
-const CRM_TEMPLATE_DEFAULTS = {
-  aniversario: "Feliz aniversário, {{nome}}! Te desejamos um dia incrível. Que tal almoçar em família para comemorar? 🎉",
-  inativos7: "Olá {{nome}}, tudo bem? Sentimos sua falta! Faz alguns dias desde o seu último pedido — quer que preparemos o seu prato favorito??",
-  inativos15: "Oi {{nome}}, estamos com saudades! Temos um CUPOM especial pra você. Quer?
-  inativos30: "Olá {{nome}}, faz tempo que não te vemos. Temos uma oferta especial para você voltar: Chama aqui no zap e vou te dar um desconto exclusivo.",
-  queda: "Olá {{nome}}, notamos que sua frequência diminuiu. Tenho certeza que podemos ter você conosco, vou te mandar um cupom especial, você quer?"
-  churn: "Olá {{nome}}, sentimos sua falta! Estamos com uma condição especial para clientes que não vêm há um tempo. Quer aproveitar e voltar essa semana?"
-};
-
-// Retorna o template salvo ou o default
-function getTemplateCRM(segment) {
-  return localStorage.getItem('crm_template_' + segment) || CRM_TEMPLATE_DEFAULTS[segment] || '';
-}
-
-// Salva o template para o segmento selecionado
-function salvarTemplateCRM() {
-  const segment = document.getElementById('crmSegmentSelect').value;
-  const msg = document.getElementById('crmTemplateMsg').value.trim();
-  if (!msg) {
-    alert('O template não pode ficar vazio.');
-    return;
-  }
-  localStorage.setItem('crm_template_' + segment, msg);
-  alert('Template salvo com sucesso para: ' + segment);
-  closeModal('crmConfigModal');
-  renderCRM(); // re-renderiza listas caso precise
-}
-
-// Restaura o template default para o segmento selecionado
-function resetTemplateDefault() {
-  const segment = document.getElementById('crmSegmentSelect').value;
-  if (!confirm('Restaurar o template padrão para este segmento?')) return;
-  localStorage.removeItem('crm_template_' + segment);
-  document.getElementById('crmTemplateMsg').value = getTemplateCRM(segment);
-  alert('Template restaurado para o padrão.');
-  renderCRM();
-}
-
-// Ao abrir o modal, preencher select/textarea com o template atual
-document.getElementById('crmConfigModal')?.addEventListener('click', function(e){
-  // evita fechar o modal quando clicar no conteúdo interno
-});
-function openModal(id) {
-  document.getElementById(id).style.display = 'block';
-  if (id === 'transacaoModal') {
-      populateClienteSelect();
-      atualizarCampoCliente();
-  }
-  if (id === 'crmConfigModal') {
-      // preencher o select/textarea com o valor atual
-      const sel = document.getElementById('crmSegmentSelect');
-      const textarea = document.getElementById('crmTemplateMsg');
-      if (sel && textarea) {
-          textarea.value = getTemplateCRM(sel.value);
-          // quando trocar o segmento, atualiza o textarea
-          sel.onchange = () => textarea.value = getTemplateCRM(sel.value);
       }
-  }
-}
-function salvarTemplateCRM() {
-    const msg = document.getElementById('crmTemplateMsg').value;
-    localStorage.setItem('crm_msg_template', msg);
-    alert('Template salvo com sucesso!');
-    closeModal('crmConfigModal');
-    renderCRM();
-}
-function enviarWhats(telefone, nomeCompleto, segmentKey = 'aniversario') {
-    if (!telefone) {
-        alert('Telefone não disponível para este cliente.');
+      configuracoes = nova;
+      localStorage.setItem(STORAGE_KEYS.config, JSON.stringify(configuracoes));
+      registrarEvento('configuracao_atualizada', { ...configuracoes, googleScriptUrl: configuracoes.googleScriptUrl ? 'preenchida' : 'vazia' });
+      mostrarToast('Configurações salvas com sucesso.', 'success');
+    }
+
+    function calcularCashbackGerado(valorCompra) {
+      if (valorCompra < configuracoes.valorMinimoGerar) return 0;
+      return arredondar(valorCompra * (configuracoes.percentualCashback / 100));
+    }
+    function calcularLimiteUso(valorCompra) { return arredondar(valorCompra * (configuracoes.limiteUsoPorCompra / 100)); }
+    function arredondar(v) { return Math.round((Number(v || 0) + Number.EPSILON) * 100) / 100; }
+    function saldoValidoCliente(clienteId, ignorarMovimentoId = null) {
+      const hoje = dataISOHoje();
+      return movimentacoes
+        .filter(m => m.clienteId === clienteId && m.status !== 'cancelado' && m.id !== ignorarMovimentoId)
+        .filter(m => Number(m.cashbackGerado || 0) > 0 && (!m.validadeAte || m.validadeAte >= hoje))
+        .reduce((s, m) => s + Number(m.cashbackGeradoDisponivel ?? m.cashbackGerado ?? 0), 0);
+    }
+
+    function salvarCliente() {
+      const id = document.getElementById('clienteEditId').value;
+      const nome = document.getElementById('nomeCliente').value.trim();
+      const telefone = limparTelefone(document.getElementById('telefoneCliente').value);
+      const nascimento = document.getElementById('nascimentoCliente').value;
+      const observacao = document.getElementById('obsCliente').value.trim();
+
+      if (!nome || telefone.length < 10) { mostrarToast('Preencha nome e telefone válido do cliente.', 'warning'); return; }
+      const telefoneJaUsado = clientes.find(c => c.telefone === telefone && c.id !== id);
+      if (telefoneJaUsado) { mostrarToast('Este telefone já está vinculado a outro cliente.', 'danger'); return; }
+
+      if (id) {
+        const cliente = clientes.find(c => c.id === id);
+        if (!cliente) return;
+        const antes = { ...cliente };
+        Object.assign(cliente, { nome, telefone, nascimento, observacao, atualizadoEm: hojeTexto() });
+        movimentacoes.forEach(m => { if (m.clienteId === id) { m.nome = nome; m.telefone = telefone; } });
+        clienteAtual = cliente;
+        registrarEvento('cliente_editado', { antes, depois: { ...cliente } });
+        mostrarToast('Cliente atualizado com sucesso.', 'success');
+      } else {
+        const cliente = { id: gerarId(), nome, telefone, nascimento, observacao, saldo: 0, totalCompras: 0, cashbackGerado: 0, cashbackUsado: 0, criadoEm: hojeTexto() };
+        clientes.push(cliente);
+        clienteAtual = cliente;
+        registrarEvento('cliente_criado', cliente);
+        mostrarToast('Cliente cadastrado com sucesso.', 'success');
+      }
+      salvarBancoLocal();
+      limparFormularioCliente();
+      renderizarClientes();
+      atualizarTelaCliente();
+    }
+    function limparFormularioCliente() {
+      ['clienteEditId','nomeCliente','telefoneCliente','nascimentoCliente','obsCliente'].forEach(id => document.getElementById(id).value = '');
+    }
+    function editarCliente(id) {
+      const cliente = clientes.find(c => c.id === id);
+      if (!cliente) return;
+      document.getElementById('clienteEditId').value = cliente.id;
+      document.getElementById('nomeCliente').value = cliente.nome;
+      document.getElementById('telefoneCliente').value = formatarTelefone(cliente.telefone);
+      document.getElementById('nascimentoCliente').value = cliente.nascimento || '';
+      document.getElementById('obsCliente').value = cliente.observacao || '';
+      mostrarToast('Cliente carregado para edição.', 'success');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    function apagarCliente(id) {
+      const cliente = clientes.find(c => c.id === id);
+      if (!cliente) return;
+      const temVendas = movimentacoes.some(m => m.clienteId === id);
+      const msg = temVendas ? `O cliente <strong>${escaparHTML(cliente.nome)}</strong> possui movimentações. Ao apagar, as vendas também serão removidas localmente, mas o evento ficará na auditoria.` : `Deseja apagar o cliente <strong>${escaparHTML(cliente.nome)}</strong>?`;
+      confirmarAcao('Apagar cliente', msg, 'Apagar cliente', () => {
+        const vendasRemovidas = movimentacoes.filter(m => m.clienteId === id);
+        clientes = clientes.filter(c => c.id !== id);
+        movimentacoes = movimentacoes.filter(m => m.clienteId !== id);
+        if (clienteAtual && clienteAtual.id === id) clienteAtual = null;
+        registrarEvento('cliente_excluido', { cliente, vendasRemovidas });
+        salvarBancoLocal(); renderizarClientes(); renderizarHistorico(); atualizarTelaCliente();
+        mostrarToast('Cliente apagado com sucesso.', 'danger');
+      });
+    }
+
+    function consultarCliente() {
+      const telefone = limparTelefone(document.getElementById('telefoneBusca').value);
+      if (!telefone) { mostrarToast('Digite o telefone do cliente.', 'warning'); return; }
+      const cliente = clientes.find(c => c.telefone === telefone);
+      if (!cliente) {
+        clienteAtual = null;
+        const area = document.getElementById('resultadoCliente');
+        area.className = 'empty';
+        area.textContent = 'Cliente não encontrado. Cadastre o cliente antes de registrar a venda.';
+        mostrarToast('Cliente não encontrado.', 'warning');
         return;
+      }
+      clienteAtual = cliente;
+      atualizarTelaCliente();
+      mostrarToast('Cliente consultado com sucesso.', 'success');
     }
-    const telLimpo = telefone.replace(/\D/g, '');
-    const primeiroNome = (nomeCompleto || '').split(' ')[0] || '';
-    let template = getTemplateCRM(segmentKey) || CRM_TEMPLATE_DEFAULTS[segmentKey] || '';
-    template = template.replace(/\{\{nome\}\}/g, primeiroNome);
-    const url = `https://wa.me/55${telLimpo}?text=${encodeURIComponent(template)}`;
-    window.open(url, '_blank');
-}
-function getTemplateCRM() {
-    return localStorage.getItem('crm_msg_template') || MSG_DEFAULT;
-}
+    function atualizarTelaCliente() {
+      const area = document.getElementById('resultadoCliente');
+      if (!clienteAtual) { area.className = 'empty'; area.textContent = 'Nenhum cliente consultado ainda.'; atualizarMetricas(); return; }
+      recalcularCliente(clienteAtual.id);
+      area.className = 'client-card';
+      area.innerHTML = `
+        <div>
+          <h3>${escaparHTML(clienteAtual.nome)}</h3>
+          <p>Telefone: ${escaparHTML(formatarTelefone(clienteAtual.telefone))}<br>Nascimento: ${escaparHTML(dataBR(clienteAtual.nascimento))}<br>Total em compras: ${formatarMoeda(clienteAtual.totalCompras)}<br>Cashback gerado: ${formatarMoeda(clienteAtual.cashbackGerado)} | Usado: ${formatarMoeda(clienteAtual.cashbackUsado)}</p>
+          <div class="actions"><button class="secondary" onclick="selecionarClienteParaVenda('${clienteAtual.id}')">Registrar venda para este cliente</button></div>
+        </div>
+        <div class="saldo-pill"><span>Saldo válido</span><strong>${formatarMoeda(clienteAtual.saldo)}</strong></div>`;
+    }
+    function limparClienteAtual() { clienteAtual = null; document.getElementById('telefoneBusca').value = ''; atualizarTelaCliente(); mostrarToast('Consulta limpa.', 'success'); }
 
-// Inicializa o campo do modal com o que está salvo
-document.getElementById('crmTemplateMsg').value = getTemplateCRM();
+    function renderizarClientes() {
+      const termo = (document.getElementById('buscaClientes')?.value || '').toLowerCase();
+      const lista = clientes.filter(c => c.nome.toLowerCase().includes(termo) || c.telefone.includes(limparTelefone(termo)));
+      const area = document.getElementById('listaClientes');
+      if (!lista.length) { area.innerHTML = '<div class="empty">Nenhum cliente encontrado.</div>'; return; }
 
-// --- LÓGICA DE FILTRAGEM CRM ---
+      const tabela = `<div class="table-wrap"><table><thead><tr><th>Nome</th><th>Telefone</th><th>Nascimento</th><th>Saldo válido</th><th>Total compras</th><th>Ações</th></tr></thead><tbody>${lista.map(c => `
+        <tr>
+          <td><strong>${escaparHTML(c.nome)}</strong></td>
+          <td>${escaparHTML(formatarTelefone(c.telefone))}</td>
+          <td>${escaparHTML(dataBR(c.nascimento))}</td>
+          <td><span class="badge success">${formatarMoeda(c.saldo)}</span></td>
+          <td>${formatarMoeda(c.totalCompras)}</td>
+          <td>
+            <button class="small-btn secondary" onclick="editarCliente('${c.id}')">Editar</button>
+            <button class="small-btn" onclick="selecionarClienteParaVenda('${c.id}')">Venda</button>
+            <button class="small-btn danger" onclick="apagarCliente('${c.id}')">Apagar</button>
+          </td>
+        </tr>`).join('')}</tbody></table></div>`;
 
-function renderCRM() {
-    const hoje = new Date();
-    const diaAtual = hoje.getDate();
-    const mesAtual = hoje.getMonth() + 1;
-    
-    // 1. Filtrar e Ordenar Aniversariantes
-    const aniversariantes = clientes
-        .filter(c => {
-            if (!c.dataNascimento) return false;
-            return parseInt(c.dataNascimento.split('-')[1]) === mesAtual;
-        })
-        .sort((a, b) => a.dataNascimento.split('-')[2] - b.dataNascimento.split('-')[2]);
+      const cards = `<div class="mobile-list">${lista.map(c => `
+        <div class="mobile-record-card">
+          <h3>${escaparHTML(c.nome)}</h3>
+          <p>${escaparHTML(formatarTelefone(c.telefone))}<br>Nascimento: ${escaparHTML(dataBR(c.nascimento))}</p>
+          <div class="mobile-record-meta">
+            <div><span>Saldo válido</span><strong>${formatarMoeda(c.saldo)}</strong></div>
+            <div><span>Total compras</span><strong>${formatarMoeda(c.totalCompras)}</strong></div>
+          </div>
+          <div class="mobile-actions">
+            <button class="secondary" onclick="editarCliente('${c.id}')">Editar</button>
+            <button onclick="selecionarClienteParaVenda('${c.id}')">Venda</button>
+            <button class="danger" onclick="apagarCliente('${c.id}')">Apagar</button>
+          </div>
+        </div>`).join('')}</div>`;
 
-    const listaQueda = [];
-    const listaChurn = [];
-
-    clientes.forEach(c => {
-        const visitas = getVisitasCliente(c.id);
-        if (visitas.length === 0) return;
-
-        const ultimaVisita = parseDateFortaleza(visitas[visitas.length - 1].data);
-        const diasInativo = Math.floor((hoje - ultimaVisita) / (1000 * 60 * 60 * 24));
-        
-        if (diasInativo > 45) {
-            listaChurn.push({ ...c, diasInativo });
-        } else {
-            const freq = calcularTaxaFrequencia(visitas);
-            if (freq && diasInativo > (freq * 1.5)) {
-                listaQueda.push({ ...c, diasInativo, freqMedia: Math.floor(freq) });
-            }
-        }
-    });
-
-   // RENDERIZAR LISTAS
-    renderizarListaCRM('listaAniversariantes', aniversariantes, 'Aniversário', diaAtual);
-    renderizarListaCRM('listaQuedaFrequencia', listaQueda, 'Frequência Baixa');
-    renderizarListaCRM('listaChurn', listaChurn, 'Risco de Churn');
-    // no final da função renderCRM(...) onde você chama renderizarListaCRM:
-renderizarListaCRM('listaAniversariantes', aniversariantes, 'Aniversário', diaAtual, 'aniversario');
-renderizarListaCRM('listaInativos7', inativos7, '7+ dias', null, 'inativos7');
-renderizarListaCRM('listaInativos15', inativos15, '15+ dias', null, 'inativos15');
-renderizarListaCRM('listaInativos30', inativos30, '30+ dias', null, 'inativos30');
-renderizarListaCRM('listaQuedaFrequencia', listaQueda, 'Frequência Diminuindo', null, 'queda');
-renderizarListaCRM('listaChurn', listaChurn, 'Risco de Churn', null, 'churn');
-}
-
-function renderizarListaCRM(idElemento, dados, label, diaAtual = null, segmentKey = 'aniversario') {
-    const lista = document.getElementById(idElemento);
-    if (!lista) return;
-    
-    if (dados.length === 0) {
-        lista.innerHTML = '<li class="list-item" style="background: rgba(255,255,255,0.02); border: none;"><small>Nenhum cliente identificado.</small></li>';
-        return;
+      area.innerHTML = tabela + cards;
     }
 
-    lista.innerHTML = dados.map(c => {
-        // c pode ser objeto cliente puro ou { ...cliente, diasInativo, freqMedia } dependendo da origem
-        const nome = c.nome || (c.cliente && c.cliente.nome) || 'Cliente';
-        const telefone = c.telefone || (c.cliente && c.cliente.telefone) || '';
-        let infoAdicional = "";
-        let estiloDestaque = "";
-        let tagHoje = "";
-
-        if (label === 'Aniversário' && c.dataNascimento) {
-            const partes = c.dataNascimento.split('-');
-            const diaAniversario = parseInt(partes[2]);
-            infoAdicional = `<span style="color: #34c759; font-weight: 500;">🎂 Dia ${diaAniversario}</span>`;
-            if (diaAniversario === diaAtual) {
-                estiloDestaque = "border: 1px solid #34c759; background: rgba(52, 199, 89, 0.07);";
-                tagHoje = `<span class="badge" style="background: #34c759; color: white; margin-left: 8px;">HOJE!</span>`;
-            }
-        } else if (c.diasInativo !== undefined) {
-            infoAdicional = `<i class="fas fa-clock"></i> Inativo há ${c.diasInativo} dias`;
-        } else if (c.freqMedia !== undefined) {
-            infoAdicional = `<i class="fas fa-chart-line-down"></i> Média: ${Math.round(c.freqMedia)} dias`;
-        } else {
-            infoAdicional = `<i class="fab fa-whatsapp"></i> ${telefone}`;
-        }
-
-        return `
-            <li class="list-item" style="${estiloDestaque} padding: 14px; margin-bottom: 8px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
-                <div style="flex:1;">
-                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
-                        <strong style="font-size:1.03em;">${nome}</strong>
-                        ${tagHoje}
-                    </div>
-                    <div style="font-size:0.9em; color: var(--text-muted);">
-                        ${infoAdicional}
-                    </div>
-                </div>
-                <div class="list-item-actions">
-                    <button class="btn btn-small" style="background:#34c759; color:white; border:none; padding:8px 12px; border-radius:8px;"
-                        onclick="enviarWhats('${telefone}', '${nome}', '${segmentKey}')">
-                        <i class="fab fa-whatsapp"></i>
-                    </button>
-                    <button class="btn btn-secondary btn-small" onclick="verPerfil('${c.id || c.clienteId || ''}')">Ver</button>
-                </div>
-            </li>
-        `;
-    }).join('');
-}
-
-function enviarWhats(telefone, nome) {
-    // Limpa o telefone (mantém apenas números)
-    const telLimpo = telefone.replace(/\D/g, '');
-    let msg = getTemplateCRM();
-    
-    // Substitui a variável {{nome}}
-    msg = msg.replace('{{nome}}', nome.split(' ')[0]);
-
-    const url = `https://wa.me/55${telLimpo}?text=${encodeURIComponent(msg)}`;
-    window.open(url, '_blank');
-}
-}
-        init();
-
-        // Função de debounce
-function debounce(func, wait) {
-    let timeout;
-    return function(...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), wait);
-    };
-}
-
-// Função para filtrar clientes com debounce
-function filtrarClientes() {
-    const termo = document.getElementById('clienteSearch').value.toLowerCase();
-    const list = document.getElementById('clientesList');
-    
-    if (!termo) {
-        renderClientes(); // Mostra todos se o campo estiver vazio
-        return;
+    function atualizarSelectClientes() {
+      const select = document.getElementById('clienteVenda');
+      if (!select) return;
+      const atual = clienteAtual?.id || select.value;
+      select.innerHTML = '<option value="">Selecione um cliente</option>' + clientes.slice().sort((a,b) => a.nome.localeCompare(b.nome)).map(c => `<option value="${c.id}">${escaparHTML(c.nome)} - ${escaparHTML(formatarTelefone(c.telefone))}</option>`).join('');
+      if (atual) select.value = atual;
+      selecionarClienteVenda(false);
+    }
+    function selecionarClienteParaVenda(id) { clienteAtual = clientes.find(c => c.id === id) || null; abrirTelaPorId('vendas'); atualizarSelectClientes(); }
+    function selecionarClienteVenda(notificar = true) {
+      const id = document.getElementById('clienteVenda')?.value;
+      const cliente = clientes.find(c => c.id === id);
+      const area = document.getElementById('resumoClienteVenda');
+      if (!cliente) { clienteAtual = null; area.className = 'empty'; area.textContent = 'Selecione um cliente para visualizar saldo e limites.'; atualizarPreviaVenda(); return; }
+      clienteAtual = cliente;
+      recalcularCliente(cliente.id);
+      area.className = 'client-card';
+      area.innerHTML = `<div><h3>${escaparHTML(cliente.nome)}</h3><p>Saldo mínimo para uso: ${formatarMoeda(configuracoes.saldoMinimoUso)}<br>Limite máximo por compra: ${configuracoes.limiteUsoPorCompra}%<br>Cashback gerado em compras a partir de ${formatarMoeda(configuracoes.valorMinimoGerar)}.<br>Validade: ${configuracoes.validadeCashback} dias.</p></div><div class="saldo-pill"><span>Saldo válido</span><strong>${formatarMoeda(cliente.saldo)}</strong></div>`;
+      atualizarPreviaVenda();
+      if (notificar) mostrarToast('Cliente selecionado para venda.', 'success');
+    }
+    function limparVenda() { document.getElementById('valorCompra').value = ''; document.getElementById('cashbackUsado').value = ''; atualizarPreviaVenda(); }
+    function atualizarPreviaVenda() {
+      const area = document.getElementById('previaVenda');
+      const btn = document.getElementById('btnFinalizarVenda');
+      const valorCompra = Number(document.getElementById('valorCompra')?.value || 0);
+      const cashbackUsado = Number(document.getElementById('cashbackUsado')?.value || 0);
+      if (!clienteAtual || valorCompra <= 0) { area.style.display = 'none'; if (btn) btn.disabled = !clienteAtual; return; }
+      const cashbackGerado = calcularCashbackGerado(valorCompra);
+      const valorFinalPago = valorCompra - cashbackUsado;
+      const limiteUso = calcularLimiteUso(valorCompra);
+      area.style.display = 'block';
+      area.innerHTML = `Valor a pagar: <strong>${formatarMoeda(valorFinalPago)}</strong> | Cashback gerado: <strong>${formatarMoeda(cashbackGerado)}</strong> | Limite de uso: <strong>${formatarMoeda(limiteUso)}</strong>`;
+      if (btn) btn.disabled = false;
+    }
+    function confirmarRegistroVenda() {
+      if (!clienteAtual) { mostrarToast('Selecione um cliente antes de registrar a venda.', 'warning'); return; }
+      const valorCompra = Number(document.getElementById('valorCompra').value || 0);
+      const cashbackUsado = Number(document.getElementById('cashbackUsado').value || 0);
+      if (!validarVenda(clienteAtual.id, valorCompra, cashbackUsado)) return;
+      const cashbackGerado = calcularCashbackGerado(valorCompra);
+      const valorFinalPago = valorCompra - cashbackUsado;
+      confirmarAcao('Finalizar venda', `Confirma a venda para <strong>${escaparHTML(clienteAtual.nome)}</strong>?<br><br>Compra: <strong>${formatarMoeda(valorCompra)}</strong><br>Cashback usado: <strong>${formatarMoeda(cashbackUsado)}</strong><br>Valor a pagar: <strong>${formatarMoeda(valorFinalPago)}</strong><br>Cashback gerado: <strong>${formatarMoeda(cashbackGerado)}</strong>`, 'Confirmar venda', registrarVenda, 'success');
+    }
+    function registrarVenda() {
+      const valorCompra = arredondar(document.getElementById('valorCompra').value);
+      const cashbackUsado = arredondar(document.getElementById('cashbackUsado').value);
+      if (!validarVenda(clienteAtual.id, valorCompra, cashbackUsado)) return;
+      const cashbackGerado = calcularCashbackGerado(valorCompra);
+      const hoje = dataISOHoje();
+      const movimento = {
+        id: gerarId(), status: 'ativo', timestamp: Date.now(), data: hojeTexto(), dataISO: hoje,
+        clienteId: clienteAtual.id, nome: clienteAtual.nome, telefone: clienteAtual.telefone,
+        valorCompra, cashbackGerado, cashbackGeradoDisponivel: cashbackGerado, cashbackUsado,
+        valorFinalPago: arredondar(valorCompra - cashbackUsado), saldoFinal: 0,
+        percentualCashback: configuracoes.percentualCashback, validadeCashback: configuracoes.validadeCashback,
+        validadeAte: cashbackGerado > 0 ? somarDiasISO(hoje, configuracoes.validadeCashback) : ''
+      };
+      consumirCashback(clienteAtual.id, cashbackUsado);
+      movimentacoes.push(movimento);
+      recalcularCliente(clienteAtual.id);
+      registrarEvento('venda_criada', movimento);
+      salvarBancoLocal(); atualizarTelaCliente(); limparVenda(); selecionarClienteVenda(false);
+      mostrarToast(`Venda registrada com sucesso.<br>Saldo atual: <strong>${formatarMoeda(clienteAtual.saldo)}</strong>`, 'success');
+    }
+    function validarVenda(clienteId, valorCompra, cashbackUsado, ignorarMovimentoId = null) {
+      const cliente = clientes.find(c => c.id === clienteId);
+      if (!cliente) { mostrarToast('Cliente não encontrado.', 'danger'); return false; }
+      const saldoValido = saldoValidoCliente(clienteId, ignorarMovimentoId);
+      if (valorCompra <= 0) { mostrarToast('Informe um valor de compra válido.', 'warning'); return false; }
+      if (cashbackUsado < 0) { mostrarToast('O cashback usado não pode ser negativo.', 'warning'); return false; }
+      if (cashbackUsado > saldoValido) { mostrarToast('O cliente não possui saldo válido suficiente.', 'danger'); return false; }
+      if (saldoValido < configuracoes.saldoMinimoUso && cashbackUsado > 0) { mostrarToast(`Saldo mínimo para usar cashback: ${formatarMoeda(configuracoes.saldoMinimoUso)}.`, 'warning'); return false; }
+      const limiteUso = calcularLimiteUso(valorCompra);
+      if (cashbackUsado > limiteUso) { mostrarToast(`Limite de uso nesta compra: ${formatarMoeda(limiteUso)}.`, 'warning'); return false; }
+      if (cashbackUsado > valorCompra) { mostrarToast('Cashback usado não pode ser maior que a compra.', 'warning'); return false; }
+      return true;
+    }
+    function consumirCashback(clienteId, valor, excluirMovimentoId = null, antesTimestamp = null) {
+      let restante = arredondar(valor);
+      if (restante <= 0) return;
+      movimentacoes
+        .filter(m => m.clienteId === clienteId)
+        .filter(m => m.status !== 'cancelado')
+        .filter(m => !excluirMovimentoId || m.id !== excluirMovimentoId)
+        .filter(m => antesTimestamp === null || Number(m.timestamp || 0) < Number(antesTimestamp || 0))
+        .filter(m => Number(m.cashbackGeradoDisponivel ?? m.cashbackGerado) > 0 && (!m.validadeAte || m.validadeAte >= dataISOHoje()))
+        .sort((a,b) => String(a.validadeAte || '').localeCompare(String(b.validadeAte || '')) || Number(a.timestamp || 0) - Number(b.timestamp || 0))
+        .forEach(m => {
+          if (restante <= 0) return;
+          const disponivel = Number(m.cashbackGeradoDisponivel ?? m.cashbackGerado ?? 0);
+          const consumo = Math.min(disponivel, restante);
+          m.cashbackGeradoDisponivel = arredondar(disponivel - consumo);
+          restante = arredondar(restante - consumo);
+        });
     }
 
-    const clientesFiltrados = clientes.filter(c => 
-        (c.nome && c.nome.toLowerCase().includes(termo)) ||
-        (c.documento && c.documento.toLowerCase().includes(termo))
-    );
+    function renderizarHistorico() {
+      const termo = (document.getElementById('buscaHistorico')?.value || '').toLowerCase();
+      const status = document.getElementById('filtroStatus')?.value || 'todos';
+      const lista = movimentacoes
+        .filter(m => (m.nome || '').toLowerCase().includes(termo) || (m.telefone || '').includes(limparTelefone(termo)))
+        .filter(m => status === 'todos' || (status === 'ativo' ? m.status !== 'cancelado' : m.status === 'cancelado'))
+        .sort((a,b) => b.timestamp - a.timestamp);
+      const area = document.getElementById('listaHistorico');
+      if (!lista.length) { area.innerHTML = '<div class="empty">Nenhuma movimentação encontrada.</div>'; return; }
 
-    if (clientesFiltrados.length === 0) {
-        list.innerHTML = `<li class="list-item"><div><strong>Nenhum cliente encontrado</strong></div></li>`;
-        return;
+      const tabela = `<div class="table-wrap"><table><thead><tr><th>Data</th><th>Cliente</th><th>Compra</th><th>Gerou</th><th>Disponível</th><th>Usou</th><th>Validade</th><th>Status</th><th>Ações</th></tr></thead><tbody>${lista.map(m => `
+        <tr>
+          <td>${escaparHTML(m.data)}</td>
+          <td><strong>${escaparHTML(m.nome)}</strong><br><span class="muted">${escaparHTML(formatarTelefone(m.telefone))}</span></td>
+          <td>${formatarMoeda(m.valorCompra)}</td><td>${formatarMoeda(m.cashbackGerado)}</td><td>${formatarMoeda(m.cashbackGeradoDisponivel ?? m.cashbackGerado)}</td><td>${formatarMoeda(m.cashbackUsado)}</td><td>${escaparHTML(dataBR(m.validadeAte))}</td>
+          <td><span class="badge ${m.status === 'cancelado' ? 'danger' : 'success'}">${m.status === 'cancelado' ? 'Cancelado' : 'Ativo'}</span></td>
+          <td>
+            ${m.status === 'cancelado' ? '' : `<button class="small-btn secondary" onclick="abrirModalEditarVenda('${m.id}')">Editar</button><button class="small-btn warning" onclick="cancelarVenda('${m.id}')">Cancelar</button>`}
+            <button class="small-btn danger" onclick="apagarVenda('${m.id}')">Apagar</button>
+          </td>
+        </tr>`).join('')}</tbody></table></div>`;
+
+      const cards = `<div class="mobile-list">${lista.map(m => `
+        <div class="mobile-record-card">
+          <h3>${escaparHTML(m.nome)}</h3>
+          <p>${escaparHTML(m.data)}<br>${escaparHTML(formatarTelefone(m.telefone))} &nbsp; <span class="badge ${m.status === 'cancelado' ? 'danger' : 'success'}">${m.status === 'cancelado' ? 'Cancelado' : 'Ativo'}</span></p>
+          <div class="mobile-record-meta">
+            <div><span>Compra</span><strong>${formatarMoeda(m.valorCompra)}</strong></div>
+            <div><span>Usou</span><strong>${formatarMoeda(m.cashbackUsado)}</strong></div>
+            <div><span>Gerou</span><strong>${formatarMoeda(m.cashbackGerado)}</strong></div>
+            <div><span>Disponível</span><strong>${formatarMoeda(m.cashbackGeradoDisponivel ?? m.cashbackGerado)}</strong></div>
+          </div>
+          <div class="mobile-actions ${m.status === 'cancelado' ? 'one' : ''}">
+            ${m.status === 'cancelado' ? '' : `<button class="secondary" onclick="abrirModalEditarVenda('${m.id}')">Editar</button><button class="warning" onclick="cancelarVenda('${m.id}')">Cancelar</button>`}
+            <button class="danger" onclick="apagarVenda('${m.id}')">Apagar</button>
+          </div>
+        </div>`).join('')}</div>`;
+
+      area.innerHTML = tabela + cards;
+    }
+    function recalcularCliente(clienteId) {
+      const cliente = clientes.find(c => c.id === clienteId);
+      if (!cliente) return;
+      cliente.saldo = saldoValidoCliente(clienteId);
+      cliente.totalCompras = 0; cliente.cashbackGerado = 0; cliente.cashbackUsado = 0;
+      movimentacoes.filter(m => m.clienteId === clienteId && m.status !== 'cancelado').sort((a,b) => a.timestamp - b.timestamp).forEach(m => {
+        cliente.totalCompras = arredondar(cliente.totalCompras + Number(m.valorCompra || 0));
+        cliente.cashbackGerado = arredondar(cliente.cashbackGerado + Number(m.cashbackGerado || 0));
+        cliente.cashbackUsado = arredondar(cliente.cashbackUsado + Number(m.cashbackUsado || 0));
+        m.saldoFinal = saldoValidoCliente(clienteId);
+      });
+    }
+    function recalcularTodosClientes() { clientes.forEach(c => recalcularCliente(c.id)); atualizarMetricas(); }
+    function abrirModalEditarVenda(id) {
+      const mov = movimentacoes.find(m => m.id === id);
+      if (!mov) return;
+      document.getElementById('editarVendaId').value = id;
+      document.getElementById('editarValorCompra').value = mov.valorCompra;
+      document.getElementById('editarCashbackUsado').value = mov.cashbackUsado;
+      atualizarPreviaEdicaoVenda();
+      document.getElementById('modalEditarVenda').classList.add('active');
+    }
+    function atualizarPreviaEdicaoVenda() {
+      const id = document.getElementById('editarVendaId').value;
+      const mov = movimentacoes.find(m => m.id === id);
+      const area = document.getElementById('previaEdicaoVenda');
+      if (!mov) return;
+      const valorCompra = Number(document.getElementById('editarValorCompra').value || 0);
+      const cashbackUsado = Number(document.getElementById('editarCashbackUsado').value || 0);
+      area.innerHTML = `Novo valor a pagar: <strong>${formatarMoeda(valorCompra - cashbackUsado)}</strong> | Novo cashback gerado: <strong>${formatarMoeda(calcularCashbackGerado(valorCompra))}</strong> | Saldo válido sem esta venda: <strong>${formatarMoeda(saldoValidoCliente(mov.clienteId, mov.id))}</strong>`;
+    }
+    function confirmarEdicaoVenda() {
+      const id = document.getElementById('editarVendaId').value;
+      const mov = movimentacoes.find(m => m.id === id);
+      if (!mov) return;
+      const valorCompra = arredondar(document.getElementById('editarValorCompra').value);
+      const cashbackUsado = arredondar(document.getElementById('editarCashbackUsado').value);
+      if (!validarVenda(mov.clienteId, valorCompra, cashbackUsado, mov.id)) return;
+      confirmarAcao('Confirmar edição', 'A venda será recalculada e registrada na auditoria. Deseja continuar?', 'Salvar edição', () => {
+        const antes = { ...mov };
+        mov.valorCompra = valorCompra;
+        mov.cashbackUsado = cashbackUsado;
+        mov.cashbackGerado = calcularCashbackGerado(valorCompra);
+        mov.cashbackGeradoDisponivel = mov.cashbackGerado;
+        mov.valorFinalPago = arredondar(valorCompra - cashbackUsado);
+        mov.editadoEm = hojeTexto();
+        fecharModal('modalEditarVenda');
+        reconstruirConsumoCashback(mov.clienteId);
+        recalcularCliente(mov.clienteId);
+        registrarEvento('venda_editada', { antes, depois: { ...mov } });
+        salvarBancoLocal(); renderizarHistorico(); selecionarClienteVenda(false);
+        mostrarToast('Venda editada e saldo recalculado com sucesso.', 'success');
+      }, 'success');
+    }
+    function reconstruirConsumoCashback(clienteId) {
+      movimentacoes.filter(m => m.clienteId === clienteId).forEach(m => { m.cashbackGeradoDisponivel = Number(m.cashbackGerado || 0); });
+      movimentacoes.filter(m => m.clienteId === clienteId && m.status !== 'cancelado').sort((a,b) => a.timestamp - b.timestamp).forEach(m => {
+        if (Number(m.cashbackUsado || 0) > 0) consumirCashback(clienteId, Number(m.cashbackUsado || 0), m.id, m.timestamp);
+      });
+    }
+    function cancelarVenda(id) {
+      const mov = movimentacoes.find(m => m.id === id);
+      if (!mov) return;
+      confirmarAcao('Cancelar venda', `Deseja cancelar a venda de <strong>${formatarMoeda(mov.valorCompra)}</strong> para <strong>${escaparHTML(mov.nome)}</strong>? O saldo será recalculado.`, 'Cancelar venda', () => {
+        const antes = { ...mov };
+        mov.status = 'cancelado'; mov.canceladoEm = hojeTexto();
+        reconstruirConsumoCashback(mov.clienteId); recalcularCliente(mov.clienteId);
+        registrarEvento('venda_cancelada', { antes, depois: { ...mov } });
+        salvarBancoLocal(); renderizarHistorico(); selecionarClienteVenda(false);
+        mostrarToast('Venda cancelada e saldo recalculado.', 'warning');
+      }, 'warning');
+    }
+    function apagarVenda(id) {
+      const mov = movimentacoes.find(m => m.id === id);
+      if (!mov) return;
+      confirmarAcao('Apagar venda', `Deseja apagar definitivamente esta movimentação de <strong>${escaparHTML(mov.nome)}</strong>?`, 'Apagar venda', () => {
+        movimentacoes = movimentacoes.filter(m => m.id !== id);
+        reconstruirConsumoCashback(mov.clienteId); recalcularCliente(mov.clienteId);
+        registrarEvento('venda_excluida', mov);
+        salvarBancoLocal(); renderizarHistorico(); selecionarClienteVenda(false);
+        mostrarToast('Venda apagada com sucesso.', 'danger');
+      });
     }
 
-    list.innerHTML = clientesFiltrados.map(c => `
-        <li class="list-item">
-            <div>
-                <strong>${c.nome}</strong><br>
-                <small><i class="fab fa-whatsapp"></i> ${c.telefone}</small>
-            </div>
-            <div class="list-item-actions">
-                <button class="btn btn-small" onclick="verPerfil('${c.id}')">Ver Perfil</button>
-                <button class="btn btn-danger btn-small" onclick="deletarCliente('${c.id}')">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-        </li>
-    `).join('');
-}
-
-// Aplicar debounce de 300ms
-const filtrarClientesDebounce = debounce(filtrarClientes, 300);
-
-// Vincular o evento de input ao campo de busca
-document.addEventListener('DOMContentLoaded', () => {
-    const searchInput = document.getElementById('clienteSearch');
-    if (searchInput) {
-        searchInput.addEventListener('input', filtrarClientesDebounce);
+    function popularFiltroMeses() {
+      const select = document.getElementById('filtroMesAniversario');
+      if (!select) return;
+      const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+      const mesAtual = new Date().getMonth() + 1;
+      select.innerHTML = '<option value="todos">Todos os meses</option>' + meses.map((m, i) => `<option value="${i+1}">${m}</option>`).join('');
+      select.value = String(mesAtual);
     }
-});
-    </script>
+    function renderizarAniversarios() {
+      const mes = document.getElementById('filtroMesAniversario')?.value || 'todos';
+      const msgBase = document.getElementById('mensagemWhatsapp')?.value || '';
+      const lista = clientes.filter(c => c.nascimento && (mes === 'todos' || Number(c.nascimento.split('-')[1]) === Number(mes))).sort((a,b) => a.nascimento.slice(5).localeCompare(b.nascimento.slice(5)));
+      const area = document.getElementById('listaAniversarios');
+      if (!lista.length) { area.innerHTML = '<div class="empty">Nenhum aniversário encontrado para o filtro selecionado.</div>'; return; }
+      const tabela = `<div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Telefone</th><th>Data</th><th>WhatsApp</th></tr></thead><tbody>${lista.map(c => {
+        const mensagem = encodeURIComponent(msgBase.replace('{nome}', c.nome));
+        const link = `https://wa.me/55${c.telefone}?text=${mensagem}`;
+        return `<tr><td><strong>${escaparHTML(c.nome)}</strong></td><td>${escaparHTML(formatarTelefone(c.telefone))}</td><td>${escaparHTML(dataBR(c.nascimento))}</td><td><a class="btn" href="${link}" target="_blank" rel="noopener">Enviar mensagem</a></td></tr>`;
+      }).join('')}</tbody></table></div>`;
+      const cards = `<div class="mobile-list">${lista.map(c => {
+        const mensagem = encodeURIComponent(msgBase.replace('{nome}', c.nome));
+        const link = `https://wa.me/55${c.telefone}?text=${mensagem}`;
+        return `<div class="mobile-record-card"><h3>${escaparHTML(c.nome)}</h3><p>${escaparHTML(formatarTelefone(c.telefone))}</p><div class="mobile-record-meta"><div><span>Aniversário</span><strong>${escaparHTML(dataBR(c.nascimento))}</strong></div></div><div class="mobile-actions one"><a class="btn" href="${link}" target="_blank" rel="noopener">Enviar WhatsApp</a></div></div>`;
+      }).join('')}</div>`;
+      area.innerHTML = tabela + cards;
+    }
+
+    function exportarBackupCSV() {
+      const linhas = [['ID','Data','Status','Nome','Telefone','Valor Compra','Cashback Gerado','Cashback Disponivel','Cashback Usado','Valor Final Pago','Saldo Final','Percentual Cashback','Validade Dias','Validade Até']];
+      movimentacoes.forEach(m => linhas.push([m.id, m.data, m.status || 'ativo', m.nome, m.telefone, m.valorCompra, m.cashbackGerado, m.cashbackGeradoDisponivel, m.cashbackUsado, m.valorFinalPago, m.saldoFinal, m.percentualCashback, m.validadeCashback, m.validadeAte]));
+      baixarCSV(linhas, 'backup_vendas_cashback.csv'); mostrarToast('Backup de vendas gerado com sucesso.', 'success');
+    }
+    function exportarClientesCSV() {
+      const linhas = [['ID','Nome','Telefone','Nascimento','Observacao','Saldo','Total Compras','Cashback Gerado','Cashback Usado','Criado em','Atualizado em']];
+      clientes.forEach(c => linhas.push([c.id, c.nome, c.telefone, c.nascimento, c.observacao, c.saldo, c.totalCompras, c.cashbackGerado, c.cashbackUsado, c.criadoEm, c.atualizadoEm]));
+      baixarCSV(linhas, 'backup_clientes_cashback.csv'); mostrarToast('Backup de clientes gerado com sucesso.', 'success');
+    }
+    function exportarEventosCSV() {
+      const linhas = [['Evento ID','Tipo','Origem','Data','Timestamp','Dados JSON']];
+      eventosAuditoria.forEach(e => linhas.push([e.eventoId, e.tipo, e.origem, e.data, e.timestamp, JSON.stringify(e.dados)]));
+      baixarCSV(linhas, 'auditoria_eventos_cashback.csv'); mostrarToast('Auditoria exportada com sucesso.', 'success');
+    }
+    function baixarCSV(linhas, nomeArquivo) {
+      const csv = '\ufeff' + linhas.map(linha => linha.map(campo => `"${String(campo ?? '').replaceAll('"', '""')}"`).join(';')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a'); link.href = url; link.download = nomeArquivo; link.click(); URL.revokeObjectURL(url);
+    }
+    function confirmarLimparTudo() {
+      confirmarAcao('Apagar todos os dados', 'Esta ação apagará clientes, vendas, configurações e auditoria salvos neste navegador. Não é possível desfazer.', 'Apagar tudo', () => {
+        clientes = []; movimentacoes = []; eventosAuditoria = []; clienteAtual = null;
+        Object.values(STORAGE_KEYS).forEach(k => localStorage.removeItem(k));
+        salvarBancoLocal(); renderizarClientes(); renderizarHistorico(); atualizarTelaCliente(); atualizarSelectClientes(); renderizarAniversarios();
+        mostrarToast('Todos os dados locais foram apagados.', 'danger');
+      });
+    }
+    async function enviarParaGoogleSheets(evento) {
+      if (!configuracoes.googleScriptUrl) return;
+      try {
+        await fetch(configuracoes.googleScriptUrl, {
+          method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(evento)
+        });
+      } catch (erro) { console.error('Erro ao enviar para Google Sheets', erro); mostrarToast('Não foi possível enviar para Google Sheets. O dado ficou salvo localmente.', 'warning'); }
+    }
+
+    popularFiltroMeses();
+    carregarConfiguracoesNaTela();
+    reconstruirTodosConsumos();
+    recalcularTodosClientes();
+    salvarBancoLocal();
+    renderizarClientes();
+    renderizarHistorico();
+    renderizarAniversarios();
+
+    function reconstruirTodosConsumos() { clientes.forEach(c => reconstruirConsumoCashback(c.id)); }
+  </script>
 </body>
 </html>
+
+<!--
+====================================================
+GOOGLE APPS SCRIPT RECOMENDADO PARA PLANILHA AUDITÁVEL
+====================================================
+
+1. Crie uma planilha no Google Sheets.
+2. Vá em Extensões > Apps Script.
+3. Cole o código abaixo.
+4. Clique em Implantar > Nova implantação > App da Web.
+5. Em "Quem pode acessar", escolha conforme sua operação.
+6. Copie a URL do Web App e cole no campo "URL do Google Apps Script" dentro do sistema.
+
+function doPost(e) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var payload = JSON.parse(e.postData.contents);
+  var aba = ss.getSheetByName("Eventos") || ss.insertSheet("Eventos");
+
+  if (aba.getLastRow() === 0) {
+    aba.appendRow(["Evento ID", "Tipo", "Origem", "Data", "Timestamp", "Dados JSON"]);
+  }
+
+  aba.appendRow([
+    payload.eventoId || "",
+    payload.tipo || "",
+    payload.origem || "",
+    payload.data || "",
+    payload.timestamp || "",
+    JSON.stringify(payload.dados || {})
+  ]);
+
+  return ContentService
+    .createTextOutput(JSON.stringify({ status: "ok" }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+-->
