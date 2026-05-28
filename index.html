@@ -3,1185 +3,673 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sistema de Cashback Trevo | Refatorado</title>
+  <title>Análise Gerencial | Trevo João Pessoa</title>
+
   <style>
     :root {
-      --bg: #f6f4fb;
-      --surface: #ffffff;
-      --surface-2: #fbf9ff;
-      --primary: #5b2394;
-      --primary-dark: #42166f;
-      --primary-soft: #efe7ff;
-      --accent: #fccf21;
-      --accent-soft: #fff8d7;
-      --text: #1f1726;
-      --muted: #746a7d;
-      --border: #e6deed;
-      --success: #16a34a;
-      --success-soft: #ecfdf5;
-      --danger: #dc2626;
-      --danger-soft: #fef2f2;
-      --warning: #d97706;
-      --warning-soft: #fff7ed;
-      --info: #2563eb;
-      --info-soft: #eff6ff;
-      --shadow: 0 16px 40px rgba(65, 22, 111, 0.10);
-      --radius-lg: 24px;
-      --radius-md: 16px;
-      --radius-sm: 12px;
+      --roxo-900: #26083f;
+      --roxo-800: #35105a;
+      --roxo-700: #4b1b78;
+      --roxo-600: #6627a5;
+      --amarelo-500: #feca16;
+      --amarelo-300: #ffe070;
+      --creme: #fffaf0;
+      --branco: #ffffff;
+      --cinza-50: #fbf9fd;
+      --cinza-100: #f3eff8;
+      --texto: #24182d;
+      --texto-suave: #675d70;
+      --verde: #176b46;
+      --verde-bg: #e8f7ef;
+      --vermelho: #b92d35;
+      --vermelho-bg: #fff0f1;
+      --borda: rgba(75, 27, 120, 0.12);
+      --sombra: 0 18px 45px rgba(38, 8, 63, 0.14);
+      --radius: 24px;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Inter, Arial, Helvetica, sans-serif; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
-      min-height: 100vh;
+      font-family: "Segoe UI", Arial, sans-serif;
       background:
-        radial-gradient(circle at top left, rgba(252,207,33,.22), transparent 30%),
-        linear-gradient(135deg, #faf7ff 0%, var(--bg) 100%);
-      color: var(--text);
-      padding: 20px;
+        radial-gradient(circle at top left, rgba(254, 202, 22, 0.20), transparent 30%),
+        linear-gradient(135deg, var(--creme) 0%, var(--cinza-100) 48%, var(--branco) 100%);
+      color: var(--texto);
+      min-height: 100vh;
+      overflow-x: hidden;
     }
-    .app { max-width: 1180px; margin: 0 auto; }
 
-    header.hero {
+    header {
+      min-height: 92vh;
       display: grid;
-      grid-template-columns: 1.35fr .85fr;
-      gap: 20px;
-      align-items: stretch;
-      margin-bottom: 20px;
+      place-items: center;
+      padding: 48px 24px;
+      position: relative;
+      overflow: hidden;
+      background:
+        linear-gradient(135deg, rgba(75, 27, 120, 0.98), rgba(38, 8, 63, 1)),
+        radial-gradient(circle at 82% 18%, rgba(254, 202, 22, 0.30), transparent 26%);
+      color: var(--branco);
     }
-    .hero-main, .hero-summary, .card {
-      background: rgba(255,255,255,.94);
+
+    header::before {
+      content: "";
+      position: absolute;
+      width: 560px;
+      height: 560px;
+      border-radius: 50%;
+      background: rgba(254, 202, 22, 0.13);
+      right: -190px;
+      top: -170px;
+      filter: blur(1px);
+    }
+
+    header::after {
+      content: "🍀";
+      position: absolute;
+      font-size: 190px;
+      opacity: 0.08;
+      left: 8%;
+      bottom: 8%;
+      transform: rotate(-18deg);
+    }
+
+    .hero {
+      width: min(1120px, 100%);
+      position: relative;
+      z-index: 1;
+      animation: rise 850ms ease both;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(254, 202, 22, 0.16);
+      border: 1px solid rgba(254, 202, 22, 0.55);
+      color: var(--amarelo-500);
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-weight: 800;
+      letter-spacing: 0.4px;
+      margin-bottom: 28px;
+    }
+
+    h1 {
+      font-size: clamp(2.6rem, 6vw, 5.8rem);
+      line-height: 0.95;
+      letter-spacing: -3px;
+      max-width: 980px;
+      margin-bottom: 26px;
+      color: var(--branco);
+    }
+
+    .hero p {
+      max-width: 780px;
+      font-size: clamp(1.05rem, 2vw, 1.35rem);
+      line-height: 1.6;
+      color: rgba(255, 255, 255, 0.88);
+      margin-bottom: 34px;
+    }
+
+    .hero strong {
+      color: var(--amarelo-500);
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: none;
+      text-decoration: none;
+      cursor: pointer;
+      padding: 15px 22px;
+      border-radius: 999px;
+      font-weight: 900;
+      transition: transform 250ms ease, box-shadow 250ms ease, background 250ms ease, color 250ms ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-primary {
+      background: var(--amarelo-500);
+      color: var(--roxo-900);
+      box-shadow: 0 12px 30px rgba(254, 202, 22, 0.25);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 18px 42px rgba(254, 202, 22, 0.36);
+      background: var(--amarelo-300);
+    }
+
+    .btn-outline {
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      color: var(--branco);
+      background: rgba(255, 255, 255, 0.08);
       backdrop-filter: blur(10px);
-      border: 1px solid rgba(230,222,237,.9);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow);
     }
-    .hero-main { padding: 28px; position: relative; overflow: hidden; }
-    .hero-main::after {
-      content: ""; width: 190px; height: 190px; border-radius: 50%;
-      background: var(--accent); opacity: .22; position: absolute; right: -56px; top: -56px;
+
+    .btn-outline:hover {
+      transform: translateY(-4px);
+      background: rgba(255, 255, 255, 0.16);
     }
-    .eyebrow {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: var(--primary-soft); color: var(--primary);
-      border-radius: 999px; padding: 8px 12px; font-size: 13px; font-weight: 900; margin-bottom: 14px;
+
+    main {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 70px 0;
     }
-    h1 { font-size: clamp(28px, 4vw, 42px); line-height: 1.05; color: var(--primary-dark); letter-spacing: -1px; margin-bottom: 10px; }
-    .hero-main p, .muted { color: var(--muted); line-height: 1.55; }
-    .hero-summary { padding: 22px; display: grid; gap: 12px; }
-    .metric { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px; }
-    .metric span { display: block; color: var(--muted); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
-    .metric strong { display: block; margin-top: 4px; font-size: 24px; color: var(--primary-dark); }
 
-    .layout { display: grid; grid-template-columns: 270px 1fr; gap: 18px; align-items: start; }
-    .sidebar { position: sticky; top: 18px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 14px; }
-    .nav-title { font-size: 13px; color: var(--muted); margin: 4px 8px 12px; font-weight: 900; text-transform: uppercase; letter-spacing: .05em; }
-    .tab-btn {
-      width: 100%; border: 1px solid transparent; background: transparent; color: var(--text);
-      display: flex; align-items: center; justify-content: space-between; gap: 12px;
-      padding: 13px 14px; border-radius: 14px; font-size: 15px; font-weight: 900; cursor: pointer;
-      transition: all .2s ease; margin-bottom: 6px; text-align: left;
+    section {
+      margin-bottom: 72px;
+      animation: fadeIn 800ms ease both;
+      scroll-margin-top: 32px;
     }
-    .tab-btn:hover { background: var(--primary-soft); color: var(--primary-dark); transform: translateX(3px); border-color: #dccdf5; }
-    .tab-btn.active { background: var(--primary); color: white; box-shadow: 0 12px 24px rgba(91,35,148,.22); }
-    .tab-btn .icon { width: 30px; height: 30px; display: inline-grid; place-items: center; border-radius: 10px; background: rgba(91,35,148,.10); }
-    .tab-btn.active .icon { background: rgba(255,255,255,.16); }
-    .content { min-width: 0; }
-    .view { display: none; animation: fade .18s ease; }
-    .view.active { display: block; }
-    @keyframes fade { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-    .card { padding: 22px; margin-bottom: 18px; }
-    .section-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 18px; }
-    h2 { font-size: 22px; color: var(--primary-dark); margin-bottom: 5px; }
-    h3 { color: var(--primary-dark); }
-    .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-    .form-grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .full { grid-column: 1 / -1; }
-    label { display: block; margin-bottom: 7px; font-size: 13px; font-weight: 900; color: #46384f; }
-    input, select {
-      width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius-sm);
-      font-size: 15px; outline: none; background: white; color: var(--text); transition: .18s ease;
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: end;
+      margin-bottom: 26px;
     }
-    input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(91,35,148,.10); }
-    input[readonly] { background: #f7f3fb; color: var(--muted); }
-    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
-    button, .btn {
-      border: none; border-radius: var(--radius-sm); padding: 13px 16px; font-size: 14px; font-weight: 900;
-      cursor: pointer; background: var(--primary); color: white; transition: transform .18s ease, box-shadow .18s ease, background .18s ease, opacity .18s ease;
-      display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px;
+
+    .section-title h2 {
+      color: var(--roxo-900);
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      line-height: 1;
+      letter-spacing: -1.5px;
     }
-    button:hover, .btn:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(91,35,148,.18); background: var(--primary-dark); }
-    button:disabled { opacity: .45; cursor: not-allowed; transform: none; box-shadow: none; }
-    button:active { transform: translateY(0); }
-    button.secondary { background: #f0edf4; color: var(--primary-dark); border: 1px solid var(--border); }
-    button.secondary:hover { background: var(--primary-soft); }
-    button.success { background: var(--success); }
-    button.success:hover { background: #12833d; }
-    button.danger { background: var(--danger); }
-    button.danger:hover { background: #b91c1c; }
-    button.warning { background: var(--warning); }
-    button.warning:hover { background: #b45309; }
-    button.info { background: var(--info); }
-    button.small-btn { padding: 9px 11px; min-height: 36px; font-size: 12px; border-radius: 10px; }
 
-    .client-card { display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: center; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border-radius: 22px; padding: 20px; margin-top: 16px; }
-    .client-card h3 { font-size: 24px; margin-bottom: 6px; color: white; }
-    .client-card p { opacity: .9; line-height: 1.55; }
-    .saldo-pill { background: var(--accent); color: #3b2600; padding: 16px; border-radius: 18px; min-width: 190px; text-align: center; box-shadow: inset 0 -4px 0 rgba(0,0,0,.08); }
-    .saldo-pill span { display: block; font-size: 12px; font-weight: 900; text-transform: uppercase; }
-    .saldo-pill strong { display: block; font-size: 28px; margin-top: 4px; }
-    .empty { background: var(--surface-2); border: 1px dashed #d8cbe6; color: var(--muted); border-radius: var(--radius-md); padding: 18px; line-height: 1.5; }
-    .notice { background: var(--accent-soft); border: 1px solid #f6df7d; border-radius: var(--radius-md); padding: 14px; color: #5c4400; line-height: 1.5; }
-
-    .table-wrap { overflow: auto; border: 1px solid var(--border); border-radius: var(--radius-md); background: white; }
-    table { width: 100%; border-collapse: collapse; min-width: 860px; }
-    th, td { padding: 13px; border-bottom: 1px solid var(--border); text-align: left; font-size: 14px; vertical-align: middle; }
-    th { color: var(--primary-dark); background: var(--surface-2); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
-    tr:hover td { background: #fffdf2; }
-    tr:last-child td { border-bottom: none; }
-    .badge { display: inline-flex; align-items: center; gap: 5px; padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 900; background: var(--primary-soft); color: var(--primary-dark); }
-    .badge.success { background: var(--success-soft); color: #14532d; }
-    .badge.danger { background: var(--danger-soft); color: #991b1b; }
-    .badge.warning { background: var(--warning-soft); color: #92400e; }
-    .badge.info { background: var(--info-soft); color: #1d4ed8; }
-
-    .toast { position: fixed; right: 22px; bottom: 22px; z-index: 40; display: grid; gap: 10px; max-width: 390px; }
-    .toast-item { background: var(--surface); color: var(--text); border: 1px solid var(--border); border-left: 5px solid var(--primary); border-radius: 16px; box-shadow: 0 14px 35px rgba(0,0,0,.14); padding: 14px 16px; line-height: 1.45; animation: slide .2s ease; }
-    .toast-item.success { border-left-color: var(--success); }
-    .toast-item.danger { border-left-color: var(--danger); }
-    .toast-item.warning { border-left-color: var(--warning); }
-    .toast-item.info { border-left-color: var(--info); }
-    @keyframes slide { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
-
-    .modal-backdrop { position: fixed; inset: 0; display: none; place-items: center; background: rgba(31,23,38,.45); z-index: 35; padding: 18px; }
-    .modal-backdrop.active { display: grid; }
-    .modal { width: min(620px, 100%); background: white; border-radius: 24px; box-shadow: 0 24px 70px rgba(0,0,0,.24); padding: 22px; max-height: 92vh; overflow: auto; }
-    .modal h3 { font-size: 22px; color: var(--primary-dark); margin-bottom: 8px; }
-    .modal p { color: var(--muted); line-height: 1.55; }
-    .modal .actions { justify-content: flex-end; }
-    .danger-zone { background: var(--danger-soft); border: 1px solid #fecaca; border-radius: var(--radius-md); padding: 16px; margin-top: 18px; }
-
-
-
-    .mobile-list { display: none; }
-    .mobile-record-card {
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 14px;
-      box-shadow: 0 10px 24px rgba(65, 22, 111, 0.07);
-      margin-bottom: 12px;
+    .section-title span {
+      color: var(--roxo-700);
+      font-weight: 900;
+      background: rgba(75, 27, 120, 0.08);
+      padding: 10px 14px;
+      border-radius: 999px;
+      white-space: nowrap;
     }
-    .mobile-record-card h3 { font-size: 16px; color: var(--primary-dark); margin-bottom: 6px; }
-    .mobile-record-card p { color: var(--muted); line-height: 1.45; font-size: 13px; }
-    .mobile-record-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
-    .mobile-record-meta div { background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 10px; }
-    .mobile-record-meta span { display: block; color: var(--muted); font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: .03em; margin-bottom: 3px; }
-    .mobile-record-meta strong { display: block; color: var(--primary-dark); font-size: 14px; }
-    .mobile-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
-    .mobile-actions.two { grid-template-columns: repeat(2, 1fr); }
-    .mobile-actions.one { grid-template-columns: 1fr; }
-    .mobile-actions button, .mobile-actions .btn { width: 100%; min-height: 42px; padding: 10px 8px; font-size: 12px; }
 
-    @media (max-width: 900px) {
-      header.hero, .layout { grid-template-columns: 1fr; }
-      .sidebar { position: static; }
-      .nav-stack { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-      .tab-btn { margin-bottom: 0; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 18px;
     }
-    @media (max-width: 680px) {
-      body { padding: 10px 10px 88px; }
-      .app { max-width: 100%; }
-      header.hero { gap: 10px; margin-bottom: 10px; }
-      .hero-main { padding: 18px; border-radius: 20px; }
-      .hero-main::after { width: 120px; height: 120px; right: -46px; top: -46px; }
-      .eyebrow { font-size: 12px; padding: 7px 10px; margin-bottom: 10px; }
-      h1 { font-size: 25px; line-height: 1.08; margin-bottom: 8px; }
-      .hero-main p { font-size: 13px; }
-      .hero-summary { grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px; border-radius: 18px; }
-      .metric { padding: 10px 8px; border-radius: 14px; text-align: center; }
-      .metric span { font-size: 9px; line-height: 1.15; }
-      .metric strong { font-size: 15px; }
-      .layout { display: block; }
-      .content { padding-bottom: 6px; }
-      .card { padding: 16px; border-radius: 20px; margin-bottom: 12px; }
-      h2 { font-size: 19px; }
-      label { font-size: 12px; }
-      input, select { min-height: 50px; font-size: 16px; padding: 13px; }
-      button, .btn { min-height: 50px; padding: 12px 14px; }
-      .form-grid, .form-grid.three { grid-template-columns: 1fr; gap: 12px; }
-      .client-card { grid-template-columns: 1fr; padding: 16px; border-radius: 18px; }
-      .client-card h3 { font-size: 20px; }
-      .saldo-pill { width: 100%; min-width: 0; }
-      .section-head { flex-direction: column; gap: 10px; margin-bottom: 14px; }
-      .actions { display: grid; grid-template-columns: 1fr; gap: 8px; }
-      .actions button, .actions .btn { width: 100%; }
-      .table-wrap { display: none; }
-      .mobile-list { display: block; }
-      .sidebar {
-        position: fixed;
-        left: 10px;
-        right: 10px;
-        bottom: 10px;
-        top: auto;
-        z-index: 32;
-        padding: 8px;
-        border-radius: 22px;
-        box-shadow: 0 16px 40px rgba(31, 23, 38, .22);
+
+    .card {
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid var(--borda);
+      border-radius: var(--radius);
+      padding: 26px;
+      box-shadow: var(--sombra);
+      transition: transform 280ms ease, box-shadow 280ms ease, border 280ms ease;
+      backdrop-filter: blur(10px);
+      color: var(--texto);
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 24px 60px rgba(38, 8, 63, 0.20);
+      border-color: rgba(254, 202, 22, 0.70);
+    }
+
+    .span-4 { grid-column: span 4; }
+    .span-5 { grid-column: span 5; }
+    .span-6 { grid-column: span 6; }
+    .span-7 { grid-column: span 7; }
+    .span-12 { grid-column: span 12; }
+
+    .metric-label {
+      color: var(--roxo-700);
+      font-weight: 900;
+      margin-bottom: 8px;
+      font-size: 0.92rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+
+    .metric-value {
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      color: var(--roxo-900);
+      font-weight: 950;
+      letter-spacing: -1px;
+    }
+
+    .metric-note {
+      margin-top: 10px;
+      color: var(--texto-suave);
+      line-height: 1.5;
+      font-weight: 500;
+    }
+
+    .negative {
+      color: var(--vermelho);
+    }
+
+    .positive {
+      color: var(--verde);
+    }
+
+    .expense-list {
+      list-style: none;
+      display: grid;
+      gap: 0;
+      margin-top: 6px;
+    }
+
+    .expense-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 13px 0;
+      border-bottom: 1px dashed rgba(75, 27, 120, 0.18);
+      line-height: 1.35;
+    }
+
+    .expense-list li:last-child {
+      border-bottom: none;
+    }
+
+    .expense-list span {
+      color: var(--texto);
+      font-weight: 600;
+    }
+
+    .expense-list b {
+      color: var(--roxo-900);
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .highlight {
+      background: linear-gradient(135deg, var(--amarelo-500), var(--amarelo-300));
+      color: var(--roxo-900);
+      border: none;
+    }
+
+    .highlight .metric-label,
+    .highlight .metric-note,
+    .highlight .metric-value {
+      color: var(--roxo-900);
+    }
+
+    .dark-card {
+      background: linear-gradient(135deg, var(--roxo-700), var(--roxo-900));
+      color: var(--branco);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+    }
+
+    .dark-card .metric-label {
+      color: var(--amarelo-500);
+    }
+
+    .dark-card .metric-note {
+      color: rgba(255, 255, 255, 0.88);
+    }
+
+    .dark-card .metric-value {
+      color: var(--amarelo-500);
+      text-shadow: 0 2px 12px rgba(0, 0, 0, 0.16);
+    }
+
+    .dark-card .expense-list li {
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.24);
+    }
+
+    .dark-card .expense-list span {
+      color: rgba(255, 255, 255, 0.94);
+      font-weight: 650;
+    }
+
+    .dark-card .expense-list b {
+      color: var(--branco);
+      font-weight: 950;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.20);
+    }
+
+    .result-card-negative {
+      background: var(--vermelho-bg);
+      border-color: rgba(185, 45, 53, 0.22);
+    }
+
+    .result-card-positive {
+      background: var(--verde-bg);
+      border-color: rgba(23, 107, 70, 0.22);
+    }
+
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .pill {
+      display: inline-flex;
+      background: rgba(254, 202, 22, 0.20);
+      color: var(--roxo-900);
+      border: 1px solid rgba(254, 202, 22, 0.70);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-weight: 900;
+      margin-bottom: 16px;
+    }
+
+    .conclusion {
+      background:
+        linear-gradient(135deg, rgba(75, 27, 120, 0.98), rgba(38, 8, 63, 1)),
+        radial-gradient(circle at top right, rgba(254, 202, 22, 0.26), transparent 25%);
+      color: var(--branco);
+      border-radius: 34px;
+      padding: clamp(32px, 6vw, 64px);
+      box-shadow: var(--sombra);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .conclusion::after {
+      content: "";
+      position: absolute;
+      width: 260px;
+      height: 260px;
+      background: rgba(254, 202, 22, 0.13);
+      border-radius: 50%;
+      right: -70px;
+      bottom: -90px;
+    }
+
+    .conclusion h2 {
+      color: var(--amarelo-500);
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      margin-bottom: 18px;
+      letter-spacing: -1.2px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .conclusion p {
+      max-width: 920px;
+      line-height: 1.75;
+      font-size: 1.1rem;
+      color: rgba(255, 255, 255, 0.92);
+      position: relative;
+      z-index: 1;
+      font-weight: 500;
+    }
+
+    .footer {
+      text-align: center;
+      color: var(--roxo-700);
+      padding: 30px 0 60px;
+      font-weight: 900;
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(28px);
       }
-      .nav-title { display: none; }
-      .nav-stack { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
-      .tab-btn {
-        min-height: 58px;
-        padding: 7px 4px;
-        margin: 0;
-        display: grid;
-        place-items: center;
-        font-size: 10px;
-        line-height: 1.15;
-        text-align: center;
-        border-radius: 16px;
+      to {
+        opacity: 1;
+        transform: translateY(0);
       }
-      .tab-btn > span:first-child { display: grid; place-items: center; gap: 3px; }
-      .tab-btn > span:last-child { display: none; }
-      .tab-btn .icon { width: 26px; height: 26px; font-size: 14px; }
-      .tab-btn[data-view="aniversarios"], .tab-btn[data-view="backup"] { display: none; }
-      .tab-btn:hover { transform: none; }
-      .toast { left: 12px; right: 12px; bottom: 86px; max-width: none; }
-      .modal-backdrop { padding: 12px; align-items: end; }
-      .modal { border-radius: 24px 24px 18px 18px; padding: 18px; max-height: 86vh; }
-      .mobile-record-meta { grid-template-columns: 1fr 1fr; }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 860px) {
+      header {
+        min-height: auto;
+        padding: 76px 22px;
+      }
+
+      .section-title {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .span-4,
+      .span-5,
+      .span-6,
+      .span-7,
+      .span-12 {
+        grid-column: span 12;
+      }
+
+      .compare {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        letter-spacing: -1.8px;
+      }
+
+      .expense-list li {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .expense-list b {
+        white-space: normal;
+      }
+    }
+
+    @media print {
+      body {
+        background: var(--branco);
+      }
+
+      header {
+        min-height: auto;
+        padding: 48px 24px;
+      }
+
+      .btn,
+      .nav-actions {
+        display: none;
+      }
+
+      .card {
+        box-shadow: none;
+      }
+
+      section {
+        page-break-inside: avoid;
+      }
     }
   </style>
 </head>
+
 <body>
-  <div class="app">
-    <header class="hero">
-      <div class="hero-main">
-        <div class="eyebrow">🍀 Sistema de Cashback</div>
-        <h1>Cashback com operação simples, segura e auditável.</h1>
-        <p>Cadastro, venda, histórico, aniversário, validade do saldo e registro de eventos para Google Sheets. A tela mostra uma função por vez para facilitar o uso no caixa.</p>
-      </div>
-      <div class="hero-summary">
-        <div class="metric"><span>Clientes cadastrados</span><strong id="metricClientes">0</strong></div>
-        <div class="metric"><span>Vendas ativas</span><strong id="metricVendas">0</strong></div>
-        <div class="metric"><span>Cashback disponível</span><strong id="metricSaldo">R$ 0,00</strong></div>
-      </div>
-    </header>
+  <header>
+    <div class="hero">
+      <div class="tag">🍀 Análise Gerencial | Trevo João Pessoa</div>
+      <h1>O negócio é saudável. O peso está fora da operação.</h1>
+      <p>
+        Relatório objetivo para demonstrar a real capacidade operacional da unidade,
+        desconsiderando <strong>empréstimos, consórcios, investimentos e despesas extraordinárias</strong>.
+      </p>
 
-    <main class="layout">
-      <aside class="sidebar">
-        <div class="nav-title">Navegação</div>
-        <div class="nav-stack">
-          <button class="tab-btn active" data-view="dashboard" onclick="abrirTela('dashboard', this)"><span><span class="icon">🏠</span> Início</span><span>›</span></button>
-          <button class="tab-btn" data-view="clientes" onclick="abrirTela('clientes', this)"><span><span class="icon">👤</span> Clientes</span><span>›</span></button>
-          <button class="tab-btn" data-view="vendas" onclick="abrirTela('vendas', this)"><span><span class="icon">🧾</span> Vendas</span><span>›</span></button>
-          <button class="tab-btn" data-view="historico" onclick="abrirTela('historico', this)"><span><span class="icon">📋</span> Histórico</span><span>›</span></button>
-          <button class="tab-btn" data-view="aniversarios" onclick="abrirTela('aniversarios', this)"><span><span class="icon">🎂</span> Aniversários</span><span>›</span></button>
-          <button class="tab-btn" data-view="config" onclick="abrirTela('config', this)"><span><span class="icon">⚙️</span> Configurações</span><span>›</span></button>
-          <button class="tab-btn" data-view="backup" onclick="abrirTela('backup', this)"><span><span class="icon">💾</span> Backup</span><span>›</span></button>
-        </div>
-      </aside>
-
-      <section class="content">
-        <div id="dashboard" class="view active">
-          <div class="card">
-            <div class="section-head">
-              <div>
-                <h2>Fluxo rápido de caixa</h2>
-                <p class="muted">Busque pelo telefone, veja saldo válido e vá direto para a venda.</p>
-              </div>
-              <button onclick="abrirTelaPorId('vendas')">Registrar venda</button>
-            </div>
-            <div class="form-grid">
-              <div>
-                <label>Telefone do cliente</label>
-                <input id="telefoneBusca" type="tel" placeholder="Ex: (85) 99999-9999" oninput="mascararTelefoneInput(this)" onkeydown="enterParaConsultar(event)" />
-              </div>
-              <div class="actions" style="align-items:end;margin-top:19px;">
-                <button onclick="consultarCliente()">Consultar cliente</button>
-                <button class="secondary" onclick="limparClienteAtual()">Limpar</button>
-              </div>
-            </div>
-            <div id="resultadoCliente" class="empty" style="margin-top:16px;">Nenhum cliente consultado ainda.</div>
-          </div>
-        </div>
-
-        <div id="clientes" class="view">
-          <div class="card">
-            <div class="section-head">
-              <div>
-                <h2>Clientes</h2>
-                <p class="muted">Cadastre, consulte, edite ou apague clientes com segurança.</p>
-              </div>
-              <button class="secondary" onclick="limparFormularioCliente()">Novo cadastro</button>
-            </div>
-            <input id="clienteEditId" type="hidden" />
-            <div class="form-grid">
-              <div>
-                <label>Nome do cliente</label>
-                <input id="nomeCliente" type="text" placeholder="Nome completo" maxlength="80" />
-              </div>
-              <div>
-                <label>Telefone</label>
-                <input id="telefoneCliente" type="tel" placeholder="Ex: (85) 99999-9999" oninput="mascararTelefoneInput(this)" />
-              </div>
-              <div>
-                <label>Data de nascimento</label>
-                <input id="nascimentoCliente" type="date" />
-              </div>
-              <div>
-                <label>Observação interna</label>
-                <input id="obsCliente" type="text" placeholder="Opcional" maxlength="120" />
-              </div>
-            </div>
-            <div class="actions">
-              <button onclick="salvarCliente()">Salvar cliente</button>
-              <button class="secondary" onclick="limparFormularioCliente()">Cancelar edição</button>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="section-head">
-              <div>
-                <h2>Lista de clientes</h2>
-                <p class="muted">Pesquise por nome ou telefone.</p>
-              </div>
-            </div>
-            <label>Pesquisar cliente</label>
-            <input id="buscaClientes" placeholder="Digite nome ou telefone" oninput="renderizarClientes()" />
-            <div id="listaClientes" style="margin-top:14px;"></div>
-          </div>
-        </div>
-
-        <div id="vendas" class="view">
-          <div class="card">
-            <div class="section-head">
-              <div>
-                <h2>Registrar venda</h2>
-                <p class="muted">O sistema valida saldo, limite por compra, validade e valor mínimo.</p>
-              </div>
-              <button class="secondary" onclick="abrirTelaPorId('clientes')">Cadastrar cliente</button>
-            </div>
-            <div class="form-grid three">
-              <div>
-                <label>Cliente</label>
-                <select id="clienteVenda" onchange="selecionarClienteVenda()"></select>
-              </div>
-              <div>
-                <label>Valor da compra</label>
-                <input id="valorCompra" type="number" step="0.01" min="0" placeholder="Ex: 100.00" oninput="atualizarPreviaVenda()" />
-              </div>
-              <div>
-                <label>Cashback usado</label>
-                <input id="cashbackUsado" type="number" step="0.01" min="0" placeholder="Ex: 10.00" oninput="atualizarPreviaVenda()" />
-              </div>
-            </div>
-            <div id="resumoClienteVenda" class="empty" style="margin-top:16px;">Selecione um cliente para visualizar saldo e limites.</div>
-            <div id="previaVenda" class="notice" style="margin-top:14px; display:none;"></div>
-            <div class="actions">
-              <button class="success" id="btnFinalizarVenda" onclick="confirmarRegistroVenda()">Finalizar venda</button>
-              <button class="secondary" onclick="limparVenda()">Cancelar</button>
-            </div>
-          </div>
-        </div>
-
-        <div id="historico" class="view">
-          <div class="card">
-            <div class="section-head">
-              <div>
-                <h2>Histórico de movimentações</h2>
-                <p class="muted">Cancelar estorna o saldo. Editar recalcula a venda e registra evento para auditoria.</p>
-              </div>
-              <button class="secondary" onclick="renderizarHistorico()">Atualizar lista</button>
-            </div>
-            <div class="form-grid">
-              <div>
-                <label>Filtrar por cliente/telefone</label>
-                <input id="buscaHistorico" placeholder="Digite nome ou telefone" oninput="renderizarHistorico()" />
-              </div>
-              <div>
-                <label>Status</label>
-                <select id="filtroStatus" onchange="renderizarHistorico()">
-                  <option value="todos">Todos</option>
-                  <option value="ativo">Ativos</option>
-                  <option value="cancelado">Cancelados</option>
-                </select>
-              </div>
-            </div>
-            <div id="listaHistorico" style="margin-top:14px;"></div>
-          </div>
-        </div>
-
-        <div id="aniversarios" class="view">
-          <div class="card">
-            <div class="section-head">
-              <div>
-                <h2>Aniversários</h2>
-                <p class="muted">Clientes com data de nascimento cadastrada para ações de WhatsApp.</p>
-              </div>
-              <button class="secondary" onclick="renderizarAniversarios()">Atualizar</button>
-            </div>
-            <div class="form-grid">
-              <div>
-                <label>Mês</label>
-                <select id="filtroMesAniversario" onchange="renderizarAniversarios()"></select>
-              </div>
-              <div>
-                <label>Mensagem base para WhatsApp</label>
-                <input id="mensagemWhatsapp" value="Olá, {nome}! A Trevo Açaí deseja um feliz aniversário para você! 🍀💜" />
-              </div>
-            </div>
-            <div id="listaAniversarios" style="margin-top:14px;"></div>
-          </div>
-        </div>
-
-        <div id="config" class="view">
-          <div class="card">
-            <div class="section-head">
-              <div>
-                <h2>Configurações do cashback</h2>
-                <p class="muted">As novas regras serão aplicadas nas próximas vendas.</p>
-              </div>
-            </div>
-            <div class="form-grid">
-              <div><label>Percentual de cashback (%)</label><input id="percentualCashback" type="number" step="0.01" min="0" max="100" /></div>
-              <div><label>Validade do cashback em dias</label><input id="validadeCashback" type="number" min="1" /></div>
-              <div><label>Valor mínimo para gerar cashback</label><input id="valorMinimoGerar" type="number" step="0.01" min="0" /></div>
-              <div><label>Saldo mínimo para usar cashback</label><input id="saldoMinimoUso" type="number" step="0.01" min="0" /></div>
-              <div><label>Limite máximo de uso por compra (%)</label><input id="limiteUsoPorCompra" type="number" step="0.01" min="0" max="100" /></div>
-              <div><label>URL do Google Apps Script</label><input id="googleScriptUrl" type="url" placeholder="Cole aqui a URL do Web App" /></div>
-            </div>
-            <div class="notice" style="margin-top:16px;">
-              Recomendação: no Google Sheets, use uma aba de eventos. Assim, cada cadastro, edição, venda, cancelamento e exclusão fica registrado como auditoria.
-            </div>
-            <div class="actions">
-              <button onclick="confirmarSalvarConfiguracoes()">Salvar configurações</button>
-              <button onclick="sincronizarDoGoogleSheets()">Sincronizar com Google Sheets</button>
-              <button class="secondary" onclick="carregarConfiguracoesNaTela(); mostrarToast('Configurações recarregadas.', 'success')">Recarregar</button>
-            </div>
-          </div>
-        </div>
-
-        <div id="backup" class="view">
-          <div class="card">
-            <div class="section-head">
-              <div>
-                <h2>Backup e exportação</h2>
-                <p class="muted">Baixe dados locais ou eventos para subir manualmente no Google Sheets.</p>
-              </div>
-            </div>
-            <div class="actions">
-              <button onclick="exportarBackupCSV()">Baixar vendas em CSV</button>
-              <button class="secondary" onclick="exportarClientesCSV()">Baixar clientes em CSV</button>
-              <button class="info" onclick="exportarEventosCSV()">Baixar auditoria/eventos</button>
-            </div>
-            <div class="danger-zone">
-              <h2 style="font-size:18px;">Zona de cuidado</h2>
-              <p class="muted">Use apenas em teste ou reinício do sistema local.</p>
-              <div class="actions">
-                <button class="danger" onclick="confirmarLimparTudo()">Apagar todos os dados locais</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <div id="toast" class="toast"></div>
-
-  <div id="modalConfirmacao" class="modal-backdrop">
-    <div class="modal">
-      <h3 id="modalTitulo">Confirmar ação</h3>
-      <p id="modalMensagem">Tem certeza?</p>
-      <div class="actions">
-        <button class="secondary" onclick="fecharModal('modalConfirmacao')">Voltar</button>
-        <button id="modalBotaoConfirmar" class="danger">Confirmar</button>
+      <div class="nav-actions">
+        <a href="#marco" class="btn btn-primary">Ver março</a>
+        <a href="#abril" class="btn btn-outline">Ver abril</a>
+        <a href="#conclusao" class="btn btn-outline">Conclusão</a>
       </div>
     </div>
-  </div>
+  </header>
 
-  <div id="modalEditarVenda" class="modal-backdrop">
-    <div class="modal">
-      <h3>Editar venda</h3>
-      <p>Altere os valores e confirme. O saldo do cliente será recalculado.</p>
-      <input id="editarVendaId" type="hidden" />
-      <div class="form-grid" style="margin-top:16px;">
-        <div><label>Novo valor da compra</label><input id="editarValorCompra" type="number" step="0.01" min="0" oninput="atualizarPreviaEdicaoVenda()" /></div>
-        <div><label>Novo cashback usado</label><input id="editarCashbackUsado" type="number" step="0.01" min="0" oninput="atualizarPreviaEdicaoVenda()" /></div>
+  <main>
+    <section id="marco">
+      <div class="section-title">
+        <h2>Março/2026</h2>
+        <span>Resultado Operacional Real</span>
       </div>
-      <div id="previaEdicaoVenda" class="notice" style="margin-top:14px;"></div>
-      <div class="actions">
-        <button class="secondary" onclick="fecharModal('modalEditarVenda')">Cancelar</button>
-        <button class="success" onclick="confirmarEdicaoVenda()">Salvar edição</button>
-      </div>
-    </div>
-  </div>
 
-  <script>
-    const STORAGE_KEYS = {
-      clientes: 'trevoCashbackClientesV2',
-      movimentacoes: 'trevoCashbackMovimentacoesV2',
-      eventos: 'trevoCashbackEventosV2',
-      config: 'trevoCashbackConfigV2'
-    };
-
-    let clientes = carregarJSON(STORAGE_KEYS.clientes, []);
-    let movimentacoes = carregarJSON(STORAGE_KEYS.movimentacoes, []);
-    let eventosAuditoria = carregarJSON(STORAGE_KEYS.eventos, []);
-    let clienteAtual = null;
-
-    let configuracoes = carregarJSON(STORAGE_KEYS.config, {
-      percentualCashback: 5,
-      validadeCashback: 30,
-      valorMinimoGerar: 20,
-      saldoMinimoUso: 5,
-      limiteUsoPorCompra: 50,
-      googleScriptUrl: ''
-    });
-
-    function carregarJSON(chave, fallback) {
-      try { return JSON.parse(localStorage.getItem(chave)) || fallback; }
-      catch { return fallback; }
-    }
-
-    function salvarBancoLocal() {
-      localStorage.setItem(STORAGE_KEYS.clientes, JSON.stringify(clientes));
-      localStorage.setItem(STORAGE_KEYS.movimentacoes, JSON.stringify(movimentacoes));
-      localStorage.setItem(STORAGE_KEYS.eventos, JSON.stringify(eventosAuditoria));
-      atualizarMetricas();
-      atualizarSelectClientes();
-    }
-
-    function registrarEvento(tipo, dados, origem = 'sistema') {
-      const evento = {
-        eventoId: gerarId(),
-        tipo,
-        origem,
-        data: hojeTexto(),
-        timestamp: Date.now(),
-        dados
-      };
-      eventosAuditoria.push(evento);
-      localStorage.setItem(STORAGE_KEYS.eventos, JSON.stringify(eventosAuditoria));
-      enviarParaGoogleSheets(evento);
-      return evento;
-    }
-
-    function escaparHTML(valor) {
-      return String(valor ?? '').replace(/[&<>'"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
-    }
-    function formatarMoeda(valor) { return Number(valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
-    function limparTelefone(telefone) { return String(telefone || '').replace(/\D/g, ''); }
-    function formatarTelefone(telefone) {
-      const t = limparTelefone(telefone).slice(0, 11);
-      if (t.length <= 2) return t;
-      if (t.length <= 7) return `(${t.slice(0,2)}) ${t.slice(2)}`;
-      return `(${t.slice(0,2)}) ${t.slice(2,7)}-${t.slice(7)}`;
-    }
-    function mascararTelefoneInput(input) { input.value = formatarTelefone(input.value); }
-    function hojeTexto() { return new Date().toLocaleString('pt-BR'); }
-    function gerarId() { return Date.now().toString(36) + Math.random().toString(36).substring(2); }
-    function dataISOHoje() { return new Date().toISOString().slice(0,10); }
-    function somarDiasISO(dataISO, dias) {
-      const d = new Date(dataISO + 'T00:00:00');
-      d.setDate(d.getDate() + Number(dias || 0));
-      return d.toISOString().slice(0,10);
-    }
-    function dataBR(dataISO) {
-      if (!dataISO) return '-';
-      const [a,m,d] = dataISO.split('-');
-      return `${d}/${m}/${a}`;
-    }
-
-    function abrirTela(id, botao) {
-      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      if (botao) botao.classList.add('active');
-      posAbrirTela(id);
-    }
-    function abrirTelaPorId(id) { abrirTela(id, document.querySelector(`.tab-btn[data-view="${id}"]`)); }
-    function posAbrirTela(id) {
-      recalcularTodosClientes();
-      if (id === 'clientes') renderizarClientes();
-      if (id === 'historico') renderizarHistorico();
-      if (id === 'vendas') { atualizarSelectClientes(); atualizarPreviaVenda(); }
-      if (id === 'config') carregarConfiguracoesNaTela();
-      if (id === 'aniversarios') renderizarAniversarios();
-    }
-
-    function mostrarToast(mensagem, tipo = 'success') {
-      const area = document.getElementById('toast');
-      const item = document.createElement('div');
-      item.className = `toast-item ${tipo}`;
-      item.innerHTML = mensagem;
-      area.appendChild(item);
-      setTimeout(() => item.remove(), 4300);
-    }
-    function confirmarAcao(titulo, mensagem, textoBotao, callback, tipo = 'danger') {
-      document.getElementById('modalTitulo').textContent = titulo;
-      document.getElementById('modalMensagem').innerHTML = mensagem;
-      const botao = document.getElementById('modalBotaoConfirmar');
-      botao.textContent = textoBotao;
-      botao.className = tipo;
-      botao.onclick = () => { fecharModal('modalConfirmacao'); callback(); };
-      document.getElementById('modalConfirmacao').classList.add('active');
-    }
-    function fecharModal(id) { document.getElementById(id).classList.remove('active'); }
-
-    function atualizarMetricas() {
-      document.getElementById('metricClientes').textContent = clientes.length;
-      document.getElementById('metricVendas').textContent = movimentacoes.filter(m => m.status !== 'cancelado').length;
-      const saldoTotal = clientes.reduce((soma, c) => soma + Number(c.saldo || 0), 0);
-      document.getElementById('metricSaldo').textContent = formatarMoeda(saldoTotal);
-    }
-    function enterParaConsultar(event) { if (event.key === 'Enter') consultarCliente(); }
-
-    function carregarConfiguracoesNaTela() {
-      document.getElementById('percentualCashback').value = configuracoes.percentualCashback;
-      document.getElementById('validadeCashback').value = configuracoes.validadeCashback;
-      document.getElementById('valorMinimoGerar').value = configuracoes.valorMinimoGerar;
-      document.getElementById('saldoMinimoUso').value = configuracoes.saldoMinimoUso;
-      document.getElementById('limiteUsoPorCompra').value = configuracoes.limiteUsoPorCompra;
-      document.getElementById('googleScriptUrl').value = configuracoes.googleScriptUrl || '';
-    }
-    function confirmarSalvarConfiguracoes() {
-      confirmarAcao('Salvar configurações', 'As novas regras serão aplicadas nas próximas vendas. Deseja continuar?', 'Salvar', salvarConfiguracoes, 'success');
-    }
-    function salvarConfiguracoes() {
-      const nova = {
-        percentualCashback: Number(document.getElementById('percentualCashback').value || 0),
-        validadeCashback: Number(document.getElementById('validadeCashback').value || 30),
-        valorMinimoGerar: Number(document.getElementById('valorMinimoGerar').value || 0),
-        saldoMinimoUso: Number(document.getElementById('saldoMinimoUso').value || 0),
-        limiteUsoPorCompra: Number(document.getElementById('limiteUsoPorCompra').value || 0),
-        googleScriptUrl: document.getElementById('googleScriptUrl').value.trim()
-      };
-      if (nova.percentualCashback < 0 || nova.percentualCashback > 100 || nova.limiteUsoPorCompra < 0 || nova.limiteUsoPorCompra > 100 || nova.validadeCashback <= 0) {
-        mostrarToast('Revise os percentuais e a validade. Os percentuais devem estar entre 0 e 100.', 'warning');
-        return;
-      }
-      configuracoes = nova;
-      localStorage.setItem(STORAGE_KEYS.config, JSON.stringify(configuracoes));
-      registrarEvento('configuracao_atualizada', { ...configuracoes, googleScriptUrl: configuracoes.googleScriptUrl ? 'preenchida' : 'vazia' });
-      mostrarToast('Configurações salvas com sucesso.', 'success');
-    }
-
-    function calcularCashbackGerado(valorCompra) {
-      if (valorCompra < configuracoes.valorMinimoGerar) return 0;
-      return arredondar(valorCompra * (configuracoes.percentualCashback / 100));
-    }
-    function calcularLimiteUso(valorCompra) { return arredondar(valorCompra * (configuracoes.limiteUsoPorCompra / 100)); }
-    function arredondar(v) { return Math.round((Number(v || 0) + Number.EPSILON) * 100) / 100; }
-    function saldoValidoCliente(clienteId, ignorarMovimentoId = null) {
-      const hoje = dataISOHoje();
-      return movimentacoes
-        .filter(m => m.clienteId === clienteId && m.status !== 'cancelado' && m.id !== ignorarMovimentoId)
-        .filter(m => Number(m.cashbackGerado || 0) > 0 && (!m.validadeAte || m.validadeAte >= hoje))
-        .reduce((s, m) => s + Number(m.cashbackGeradoDisponivel ?? m.cashbackGerado ?? 0), 0);
-    }
-
-    function salvarCliente() {
-      const id = document.getElementById('clienteEditId').value;
-      const nome = document.getElementById('nomeCliente').value.trim();
-      const telefone = limparTelefone(document.getElementById('telefoneCliente').value);
-      const nascimento = document.getElementById('nascimentoCliente').value;
-      const observacao = document.getElementById('obsCliente').value.trim();
-
-      if (!nome || telefone.length < 10) { mostrarToast('Preencha nome e telefone válido do cliente.', 'warning'); return; }
-      const telefoneJaUsado = clientes.find(c => c.telefone === telefone && c.id !== id);
-      if (telefoneJaUsado) { mostrarToast('Este telefone já está vinculado a outro cliente.', 'danger'); return; }
-
-      if (id) {
-        const cliente = clientes.find(c => c.id === id);
-        if (!cliente) return;
-        const antes = { ...cliente };
-        Object.assign(cliente, { nome, telefone, nascimento, observacao, atualizadoEm: hojeTexto() });
-        movimentacoes.forEach(m => { if (m.clienteId === id) { m.nome = nome; m.telefone = telefone; } });
-        clienteAtual = cliente;
-        registrarEvento('cliente_editado', { antes, depois: { ...cliente } });
-        mostrarToast('Cliente atualizado com sucesso.', 'success');
-      } else {
-        const cliente = { id: gerarId(), nome, telefone, nascimento, observacao, saldo: 0, totalCompras: 0, cashbackGerado: 0, cashbackUsado: 0, criadoEm: hojeTexto() };
-        clientes.push(cliente);
-        clienteAtual = cliente;
-        registrarEvento('cliente_criado', cliente);
-        mostrarToast('Cliente cadastrado com sucesso.', 'success');
-      }
-      salvarBancoLocal();
-      limparFormularioCliente();
-      renderizarClientes();
-      atualizarTelaCliente();
-    }
-    function limparFormularioCliente() {
-      ['clienteEditId','nomeCliente','telefoneCliente','nascimentoCliente','obsCliente'].forEach(id => document.getElementById(id).value = '');
-    }
-    function editarCliente(id) {
-      const cliente = clientes.find(c => c.id === id);
-      if (!cliente) return;
-      document.getElementById('clienteEditId').value = cliente.id;
-      document.getElementById('nomeCliente').value = cliente.nome;
-      document.getElementById('telefoneCliente').value = formatarTelefone(cliente.telefone);
-      document.getElementById('nascimentoCliente').value = cliente.nascimento || '';
-      document.getElementById('obsCliente').value = cliente.observacao || '';
-      mostrarToast('Cliente carregado para edição.', 'success');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-    function apagarCliente(id) {
-      const cliente = clientes.find(c => c.id === id);
-      if (!cliente) return;
-      const temVendas = movimentacoes.some(m => m.clienteId === id);
-      const msg = temVendas ? `O cliente <strong>${escaparHTML(cliente.nome)}</strong> possui movimentações. Ao apagar, as vendas também serão removidas localmente, mas o evento ficará na auditoria.` : `Deseja apagar o cliente <strong>${escaparHTML(cliente.nome)}</strong>?`;
-      confirmarAcao('Apagar cliente', msg, 'Apagar cliente', () => {
-        const vendasRemovidas = movimentacoes.filter(m => m.clienteId === id);
-        clientes = clientes.filter(c => c.id !== id);
-        movimentacoes = movimentacoes.filter(m => m.clienteId !== id);
-        if (clienteAtual && clienteAtual.id === id) clienteAtual = null;
-        registrarEvento('cliente_excluido', { cliente, vendasRemovidas });
-        salvarBancoLocal(); renderizarClientes(); renderizarHistorico(); atualizarTelaCliente();
-        mostrarToast('Cliente apagado com sucesso.', 'danger');
-      });
-    }
-
-    function consultarCliente() {
-      const telefone = limparTelefone(document.getElementById('telefoneBusca').value);
-      if (!telefone) { mostrarToast('Digite o telefone do cliente.', 'warning'); return; }
-      const cliente = clientes.find(c => c.telefone === telefone);
-      if (!cliente) {
-        clienteAtual = null;
-        const area = document.getElementById('resultadoCliente');
-        area.className = 'empty';
-        area.textContent = 'Cliente não encontrado. Cadastre o cliente antes de registrar a venda.';
-        mostrarToast('Cliente não encontrado.', 'warning');
-        return;
-      }
-      clienteAtual = cliente;
-      atualizarTelaCliente();
-      mostrarToast('Cliente consultado com sucesso.', 'success');
-    }
-    function atualizarTelaCliente() {
-      const area = document.getElementById('resultadoCliente');
-      if (!clienteAtual) { area.className = 'empty'; area.textContent = 'Nenhum cliente consultado ainda.'; atualizarMetricas(); return; }
-      recalcularCliente(clienteAtual.id);
-      area.className = 'client-card';
-      area.innerHTML = `
-        <div>
-          <h3>${escaparHTML(clienteAtual.nome)}</h3>
-          <p>Telefone: ${escaparHTML(formatarTelefone(clienteAtual.telefone))}<br>Nascimento: ${escaparHTML(dataBR(clienteAtual.nascimento))}<br>Total em compras: ${formatarMoeda(clienteAtual.totalCompras)}<br>Cashback gerado: ${formatarMoeda(clienteAtual.cashbackGerado)} | Usado: ${formatarMoeda(clienteAtual.cashbackUsado)}</p>
-          <div class="actions"><button class="secondary" onclick="selecionarClienteParaVenda('${clienteAtual.id}')">Registrar venda para este cliente</button></div>
+      <div class="grid">
+        <div class="card highlight span-4">
+          <div class="metric-label">Receita considerada</div>
+          <div class="metric-value">R$ 60.203,78</div>
+          <div class="metric-note">Base de faturamento para análise da operação.</div>
         </div>
-        <div class="saldo-pill"><span>Saldo válido</span><strong>${formatarMoeda(clienteAtual.saldo)}</strong></div>`;
-    }
-    function limparClienteAtual() { clienteAtual = null; document.getElementById('telefoneBusca').value = ''; atualizarTelaCliente(); mostrarToast('Consulta limpa.', 'success'); }
 
-    function renderizarClientes() {
-      const termo = (document.getElementById('buscaClientes')?.value || '').toLowerCase();
-      const lista = clientes.filter(c => c.nome.toLowerCase().includes(termo) || c.telefone.includes(limparTelefone(termo)));
-      const area = document.getElementById('listaClientes');
-      if (!lista.length) { area.innerHTML = '<div class="empty">Nenhum cliente encontrado.</div>'; return; }
+        <div class="card span-4">
+          <div class="metric-label">Despesas operacionais</div>
+          <div class="metric-value">R$ 61.817,52</div>
+          <div class="metric-note">Custos da operação diária da loja.</div>
+        </div>
 
-      const tabela = `<div class="table-wrap"><table><thead><tr><th>Nome</th><th>Telefone</th><th>Nascimento</th><th>Saldo válido</th><th>Total compras</th><th>Ações</th></tr></thead><tbody>${lista.map(c => `
-        <tr>
-          <td><strong>${escaparHTML(c.nome)}</strong></td>
-          <td>${escaparHTML(formatarTelefone(c.telefone))}</td>
-          <td>${escaparHTML(dataBR(c.nascimento))}</td>
-          <td><span class="badge success">${formatarMoeda(c.saldo)}</span></td>
-          <td>${formatarMoeda(c.totalCompras)}</td>
-          <td>
-            <button class="small-btn secondary" onclick="editarCliente('${c.id}')">Editar</button>
-            <button class="small-btn" onclick="selecionarClienteParaVenda('${c.id}')">Venda</button>
-            <button class="small-btn danger" onclick="apagarCliente('${c.id}')">Apagar</button>
-          </td>
-        </tr>`).join('')}</tbody></table></div>`;
+        <div class="card result-card-negative span-4">
+          <div class="metric-label">Lucro operacional estimado</div>
+          <div class="metric-value negative">- R$ 1.613</div>
+          <div class="metric-note">Operação próxima do ponto de equilíbrio.</div>
+        </div>
 
-      const cards = `<div class="mobile-list">${lista.map(c => `
-        <div class="mobile-record-card">
-          <h3>${escaparHTML(c.nome)}</h3>
-          <p>${escaparHTML(formatarTelefone(c.telefone))}<br>Nascimento: ${escaparHTML(dataBR(c.nascimento))}</p>
-          <div class="mobile-record-meta">
-            <div><span>Saldo válido</span><strong>${formatarMoeda(c.saldo)}</strong></div>
-            <div><span>Total compras</span><strong>${formatarMoeda(c.totalCompras)}</strong></div>
-          </div>
-          <div class="mobile-actions">
-            <button class="secondary" onclick="editarCliente('${c.id}')">Editar</button>
-            <button onclick="selecionarClienteParaVenda('${c.id}')">Venda</button>
-            <button class="danger" onclick="apagarCliente('${c.id}')">Apagar</button>
-          </div>
-        </div>`).join('')}</div>`;
+        <div class="card span-7">
+          <div class="metric-label">Despesas operacionais consideradas</div>
+          <ul class="expense-list">
+            <li><span>Impostos</span><b>R$ 1.545,53</b></li>
+            <li><span>CMV</span><b>R$ 40.265,91</b></li>
+            <li><span>Pessoal</span><b>R$ 7.658,33</b></li>
+            <li><span>Administrativas</span><b>R$ 8.613,61</b></li>
+            <li><span>Marketing</span><b>R$ 2.342,32</b></li>
+            <li><span>Logística</span><b>R$ 530,00</b></li>
+            <li><span>Taxas de venda</span><b>R$ 861,91</b></li>
+          </ul>
+        </div>
 
-      area.innerHTML = tabela + cards;
-    }
+        <div class="card dark-card span-5">
+          <div class="metric-label">Valores desconsiderados</div>
+          <ul class="expense-list">
+            <li><span>Pagamento de empréstimos</span><b>R$ 9.199,19</b></li>
+            <li><span>Consórcio</span><b>R$ 655,00</b></li>
+            <li><span>Investimentos/imobilizado</span><b>R$ 2.311,88</b></li>
+          </ul>
+          <div style="height: 18px"></div>
+          <div class="metric-label">Total extraordinário</div>
+          <div class="metric-value">R$ 12.166,07</div>
+          <div class="metric-note">Valores que pressionam o caixa, mas não representam a operação diária.</div>
+        </div>
+      </div>
+    </section>
 
-    function atualizarSelectClientes() {
-      const select = document.getElementById('clienteVenda');
-      if (!select) return;
-      const atual = clienteAtual?.id || select.value;
-      select.innerHTML = '<option value="">Selecione um cliente</option>' + clientes.slice().sort((a,b) => a.nome.localeCompare(b.nome)).map(c => `<option value="${c.id}">${escaparHTML(c.nome)} - ${escaparHTML(formatarTelefone(c.telefone))}</option>`).join('');
-      if (atual) select.value = atual;
-      selecionarClienteVenda(false);
-    }
-    function selecionarClienteParaVenda(id) { clienteAtual = clientes.find(c => c.id === id) || null; abrirTelaPorId('vendas'); atualizarSelectClientes(); }
-    function selecionarClienteVenda(notificar = true) {
-      const id = document.getElementById('clienteVenda')?.value;
-      const cliente = clientes.find(c => c.id === id);
-      const area = document.getElementById('resumoClienteVenda');
-      if (!cliente) { clienteAtual = null; area.className = 'empty'; area.textContent = 'Selecione um cliente para visualizar saldo e limites.'; atualizarPreviaVenda(); return; }
-      clienteAtual = cliente;
-      recalcularCliente(cliente.id);
-      area.className = 'client-card';
-      area.innerHTML = `<div><h3>${escaparHTML(cliente.nome)}</h3><p>Saldo mínimo para uso: ${formatarMoeda(configuracoes.saldoMinimoUso)}<br>Limite máximo por compra: ${configuracoes.limiteUsoPorCompra}%<br>Cashback gerado em compras a partir de ${formatarMoeda(configuracoes.valorMinimoGerar)}.<br>Validade: ${configuracoes.validadeCashback} dias.</p></div><div class="saldo-pill"><span>Saldo válido</span><strong>${formatarMoeda(cliente.saldo)}</strong></div>`;
-      atualizarPreviaVenda();
-      if (notificar) mostrarToast('Cliente selecionado para venda.', 'success');
-    }
-    function limparVenda() { document.getElementById('valorCompra').value = ''; document.getElementById('cashbackUsado').value = ''; atualizarPreviaVenda(); }
-    function atualizarPreviaVenda() {
-      const area = document.getElementById('previaVenda');
-      const btn = document.getElementById('btnFinalizarVenda');
-      const valorCompra = Number(document.getElementById('valorCompra')?.value || 0);
-      const cashbackUsado = Number(document.getElementById('cashbackUsado')?.value || 0);
-      if (!clienteAtual || valorCompra <= 0) { area.style.display = 'none'; if (btn) btn.disabled = !clienteAtual; return; }
-      const cashbackGerado = calcularCashbackGerado(valorCompra);
-      const valorFinalPago = valorCompra - cashbackUsado;
-      const limiteUso = calcularLimiteUso(valorCompra);
-      area.style.display = 'block';
-      area.innerHTML = `Valor a pagar: <strong>${formatarMoeda(valorFinalPago)}</strong> | Cashback gerado: <strong>${formatarMoeda(cashbackGerado)}</strong> | Limite de uso: <strong>${formatarMoeda(limiteUso)}</strong>`;
-      if (btn) btn.disabled = false;
-    }
-    function confirmarRegistroVenda() {
-      if (!clienteAtual) { mostrarToast('Selecione um cliente antes de registrar a venda.', 'warning'); return; }
-      const valorCompra = Number(document.getElementById('valorCompra').value || 0);
-      const cashbackUsado = Number(document.getElementById('cashbackUsado').value || 0);
-      if (!validarVenda(clienteAtual.id, valorCompra, cashbackUsado)) return;
-      const cashbackGerado = calcularCashbackGerado(valorCompra);
-      const valorFinalPago = valorCompra - cashbackUsado;
-      confirmarAcao('Finalizar venda', `Confirma a venda para <strong>${escaparHTML(clienteAtual.nome)}</strong>?<br><br>Compra: <strong>${formatarMoeda(valorCompra)}</strong><br>Cashback usado: <strong>${formatarMoeda(cashbackUsado)}</strong><br>Valor a pagar: <strong>${formatarMoeda(valorFinalPago)}</strong><br>Cashback gerado: <strong>${formatarMoeda(cashbackGerado)}</strong>`, 'Confirmar venda', registrarVenda, 'success');
-    }
-    function registrarVenda() {
-      const valorCompra = arredondar(document.getElementById('valorCompra').value);
-      const cashbackUsado = arredondar(document.getElementById('cashbackUsado').value);
-      if (!validarVenda(clienteAtual.id, valorCompra, cashbackUsado)) return;
-      const cashbackGerado = calcularCashbackGerado(valorCompra);
-      const hoje = dataISOHoje();
-      const movimento = {
-        id: gerarId(), status: 'ativo', timestamp: Date.now(), data: hojeTexto(), dataISO: hoje,
-        clienteId: clienteAtual.id, nome: clienteAtual.nome, telefone: clienteAtual.telefone,
-        valorCompra, cashbackGerado, cashbackGeradoDisponivel: cashbackGerado, cashbackUsado,
-        valorFinalPago: arredondar(valorCompra - cashbackUsado), saldoFinal: 0,
-        percentualCashback: configuracoes.percentualCashback, validadeCashback: configuracoes.validadeCashback,
-        validadeAte: cashbackGerado > 0 ? somarDiasISO(hoje, configuracoes.validadeCashback) : ''
-      };
-      consumirCashback(clienteAtual.id, cashbackUsado);
-      movimentacoes.push(movimento);
-      recalcularCliente(clienteAtual.id);
-      registrarEvento('venda_criada', movimento);
-      salvarBancoLocal(); atualizarTelaCliente(); limparVenda(); selecionarClienteVenda(false);
-      mostrarToast(`Venda registrada com sucesso.<br>Saldo atual: <strong>${formatarMoeda(clienteAtual.saldo)}</strong>`, 'success');
-    }
-    function validarVenda(clienteId, valorCompra, cashbackUsado, ignorarMovimentoId = null) {
-      const cliente = clientes.find(c => c.id === clienteId);
-      if (!cliente) { mostrarToast('Cliente não encontrado.', 'danger'); return false; }
-      const saldoValido = saldoValidoCliente(clienteId, ignorarMovimentoId);
-      if (valorCompra <= 0) { mostrarToast('Informe um valor de compra válido.', 'warning'); return false; }
-      if (cashbackUsado < 0) { mostrarToast('O cashback usado não pode ser negativo.', 'warning'); return false; }
-      if (cashbackUsado > saldoValido) { mostrarToast('O cliente não possui saldo válido suficiente.', 'danger'); return false; }
-      if (saldoValido < configuracoes.saldoMinimoUso && cashbackUsado > 0) { mostrarToast(`Saldo mínimo para usar cashback: ${formatarMoeda(configuracoes.saldoMinimoUso)}.`, 'warning'); return false; }
-      const limiteUso = calcularLimiteUso(valorCompra);
-      if (cashbackUsado > limiteUso) { mostrarToast(`Limite de uso nesta compra: ${formatarMoeda(limiteUso)}.`, 'warning'); return false; }
-      if (cashbackUsado > valorCompra) { mostrarToast('Cashback usado não pode ser maior que a compra.', 'warning'); return false; }
-      return true;
-    }
-    function consumirCashback(clienteId, valor, excluirMovimentoId = null, antesTimestamp = null) {
-      let restante = arredondar(valor);
-      if (restante <= 0) return;
-      movimentacoes
-        .filter(m => m.clienteId === clienteId)
-        .filter(m => m.status !== 'cancelado')
-        .filter(m => !excluirMovimentoId || m.id !== excluirMovimentoId)
-        .filter(m => antesTimestamp === null || Number(m.timestamp || 0) < Number(antesTimestamp || 0))
-        .filter(m => Number(m.cashbackGeradoDisponivel ?? m.cashbackGerado) > 0 && (!m.validadeAte || m.validadeAte >= dataISOHoje()))
-        .sort((a,b) => String(a.validadeAte || '').localeCompare(String(b.validadeAte || '')) || Number(a.timestamp || 0) - Number(b.timestamp || 0))
-        .forEach(m => {
-          if (restante <= 0) return;
-          const disponivel = Number(m.cashbackGeradoDisponivel ?? m.cashbackGerado ?? 0);
-          const consumo = Math.min(disponivel, restante);
-          m.cashbackGeradoDisponivel = arredondar(disponivel - consumo);
-          restante = arredondar(restante - consumo);
-        });
-    }
+    <section id="abril">
+      <div class="section-title">
+        <h2>Abril/2026</h2>
+        <span>Resultado Operacional Real</span>
+      </div>
 
-    function renderizarHistorico() {
-      const termo = (document.getElementById('buscaHistorico')?.value || '').toLowerCase();
-      const status = document.getElementById('filtroStatus')?.value || 'todos';
-      const lista = movimentacoes
-        .filter(m => (m.nome || '').toLowerCase().includes(termo) || (m.telefone || '').includes(limparTelefone(termo)))
-        .filter(m => status === 'todos' || (status === 'ativo' ? m.status !== 'cancelado' : m.status === 'cancelado'))
-        .sort((a,b) => b.timestamp - a.timestamp);
-      const area = document.getElementById('listaHistorico');
-      if (!lista.length) { area.innerHTML = '<div class="empty">Nenhuma movimentação encontrada.</div>'; return; }
+      <div class="grid">
+        <div class="card highlight span-4">
+          <div class="metric-label">Receita considerada</div>
+          <div class="metric-value">R$ 49.748,07</div>
+          <div class="metric-note">Base de faturamento enviada para abril.</div>
+        </div>
 
-      const tabela = `<div class="table-wrap"><table><thead><tr><th>Data</th><th>Cliente</th><th>Compra</th><th>Gerou</th><th>Disponível</th><th>Usou</th><th>Validade</th><th>Status</th><th>Ações</th></tr></thead><tbody>${lista.map(m => `
-        <tr>
-          <td>${escaparHTML(m.data)}</td>
-          <td><strong>${escaparHTML(m.nome)}</strong><br><span class="muted">${escaparHTML(formatarTelefone(m.telefone))}</span></td>
-          <td>${formatarMoeda(m.valorCompra)}</td><td>${formatarMoeda(m.cashbackGerado)}</td><td>${formatarMoeda(m.cashbackGeradoDisponivel ?? m.cashbackGerado)}</td><td>${formatarMoeda(m.cashbackUsado)}</td><td>${escaparHTML(dataBR(m.validadeAte))}</td>
-          <td><span class="badge ${m.status === 'cancelado' ? 'danger' : 'success'}">${m.status === 'cancelado' ? 'Cancelado' : 'Ativo'}</span></td>
-          <td>
-            ${m.status === 'cancelado' ? '' : `<button class="small-btn secondary" onclick="abrirModalEditarVenda('${m.id}')">Editar</button><button class="small-btn warning" onclick="cancelarVenda('${m.id}')">Cancelar</button>`}
-            <button class="small-btn danger" onclick="apagarVenda('${m.id}')">Apagar</button>
-          </td>
-        </tr>`).join('')}</tbody></table></div>`;
+        <div class="card span-4">
+          <div class="metric-label">Despesas operacionais</div>
+          <div class="metric-value">R$ 43.724,70</div>
+          <div class="metric-note">Custos da operação diária da loja.</div>
+        </div>
 
-      const cards = `<div class="mobile-list">${lista.map(m => `
-        <div class="mobile-record-card">
-          <h3>${escaparHTML(m.nome)}</h3>
-          <p>${escaparHTML(m.data)}<br>${escaparHTML(formatarTelefone(m.telefone))} &nbsp; <span class="badge ${m.status === 'cancelado' ? 'danger' : 'success'}">${m.status === 'cancelado' ? 'Cancelado' : 'Ativo'}</span></p>
-          <div class="mobile-record-meta">
-            <div><span>Compra</span><strong>${formatarMoeda(m.valorCompra)}</strong></div>
-            <div><span>Usou</span><strong>${formatarMoeda(m.cashbackUsado)}</strong></div>
-            <div><span>Gerou</span><strong>${formatarMoeda(m.cashbackGerado)}</strong></div>
-            <div><span>Disponível</span><strong>${formatarMoeda(m.cashbackGeradoDisponivel ?? m.cashbackGerado)}</strong></div>
-          </div>
-          <div class="mobile-actions ${m.status === 'cancelado' ? 'one' : ''}">
-            ${m.status === 'cancelado' ? '' : `<button class="secondary" onclick="abrirModalEditarVenda('${m.id}')">Editar</button><button class="warning" onclick="cancelarVenda('${m.id}')">Cancelar</button>`}
-            <button class="danger" onclick="apagarVenda('${m.id}')">Apagar</button>
-          </div>
-        </div>`).join('')}</div>`;
+        <div class="card result-card-positive span-4">
+          <div class="metric-label">Lucro operacional estimado</div>
+          <div class="metric-value positive">+ R$ 6.023</div>
+          <div class="metric-note">A operação gerou resultado positivo mesmo com menor faturamento.</div>
+        </div>
 
-      area.innerHTML = tabela + cards;
-    }
-    function recalcularCliente(clienteId) {
-      const cliente = clientes.find(c => c.id === clienteId);
-      if (!cliente) return;
-      cliente.saldo = saldoValidoCliente(clienteId);
-      cliente.totalCompras = 0; cliente.cashbackGerado = 0; cliente.cashbackUsado = 0;
-      movimentacoes.filter(m => m.clienteId === clienteId && m.status !== 'cancelado').sort((a,b) => a.timestamp - b.timestamp).forEach(m => {
-        cliente.totalCompras = arredondar(cliente.totalCompras + Number(m.valorCompra || 0));
-        cliente.cashbackGerado = arredondar(cliente.cashbackGerado + Number(m.cashbackGerado || 0));
-        cliente.cashbackUsado = arredondar(cliente.cashbackUsado + Number(m.cashbackUsado || 0));
-        m.saldoFinal = saldoValidoCliente(clienteId);
-      });
-    }
-    function recalcularTodosClientes() { clientes.forEach(c => recalcularCliente(c.id)); atualizarMetricas(); }
-    function abrirModalEditarVenda(id) {
-      const mov = movimentacoes.find(m => m.id === id);
-      if (!mov) return;
-      document.getElementById('editarVendaId').value = id;
-      document.getElementById('editarValorCompra').value = mov.valorCompra;
-      document.getElementById('editarCashbackUsado').value = mov.cashbackUsado;
-      atualizarPreviaEdicaoVenda();
-      document.getElementById('modalEditarVenda').classList.add('active');
-    }
-    function atualizarPreviaEdicaoVenda() {
-      const id = document.getElementById('editarVendaId').value;
-      const mov = movimentacoes.find(m => m.id === id);
-      const area = document.getElementById('previaEdicaoVenda');
-      if (!mov) return;
-      const valorCompra = Number(document.getElementById('editarValorCompra').value || 0);
-      const cashbackUsado = Number(document.getElementById('editarCashbackUsado').value || 0);
-      area.innerHTML = `Novo valor a pagar: <strong>${formatarMoeda(valorCompra - cashbackUsado)}</strong> | Novo cashback gerado: <strong>${formatarMoeda(calcularCashbackGerado(valorCompra))}</strong> | Saldo válido sem esta venda: <strong>${formatarMoeda(saldoValidoCliente(mov.clienteId, mov.id))}</strong>`;
-    }
-    function confirmarEdicaoVenda() {
-      const id = document.getElementById('editarVendaId').value;
-      const mov = movimentacoes.find(m => m.id === id);
-      if (!mov) return;
-      const valorCompra = arredondar(document.getElementById('editarValorCompra').value);
-      const cashbackUsado = arredondar(document.getElementById('editarCashbackUsado').value);
-      if (!validarVenda(mov.clienteId, valorCompra, cashbackUsado, mov.id)) return;
-      confirmarAcao('Confirmar edição', 'A venda será recalculada e registrada na auditoria. Deseja continuar?', 'Salvar edição', () => {
-        const antes = { ...mov };
-        mov.valorCompra = valorCompra;
-        mov.cashbackUsado = cashbackUsado;
-        mov.cashbackGerado = calcularCashbackGerado(valorCompra);
-        mov.cashbackGeradoDisponivel = mov.cashbackGerado;
-        mov.valorFinalPago = arredondar(valorCompra - cashbackUsado);
-        mov.editadoEm = hojeTexto();
-        fecharModal('modalEditarVenda');
-        reconstruirConsumoCashback(mov.clienteId);
-        recalcularCliente(mov.clienteId);
-        registrarEvento('venda_editada', { antes, depois: { ...mov } });
-        salvarBancoLocal(); renderizarHistorico(); selecionarClienteVenda(false);
-        mostrarToast('Venda editada e saldo recalculado com sucesso.', 'success');
-      }, 'success');
-    }
-    function reconstruirConsumoCashback(clienteId) {
-      movimentacoes.filter(m => m.clienteId === clienteId).forEach(m => { m.cashbackGeradoDisponivel = Number(m.cashbackGerado || 0); });
-      movimentacoes.filter(m => m.clienteId === clienteId && m.status !== 'cancelado').sort((a,b) => a.timestamp - b.timestamp).forEach(m => {
-        if (Number(m.cashbackUsado || 0) > 0) consumirCashback(clienteId, Number(m.cashbackUsado || 0), m.id, m.timestamp);
-      });
-    }
-    function cancelarVenda(id) {
-      const mov = movimentacoes.find(m => m.id === id);
-      if (!mov) return;
-      confirmarAcao('Cancelar venda', `Deseja cancelar a venda de <strong>${formatarMoeda(mov.valorCompra)}</strong> para <strong>${escaparHTML(mov.nome)}</strong>? O saldo será recalculado.`, 'Cancelar venda', () => {
-        const antes = { ...mov };
-        mov.status = 'cancelado'; mov.canceladoEm = hojeTexto();
-        reconstruirConsumoCashback(mov.clienteId); recalcularCliente(mov.clienteId);
-        registrarEvento('venda_cancelada', { antes, depois: { ...mov } });
-        salvarBancoLocal(); renderizarHistorico(); selecionarClienteVenda(false);
-        mostrarToast('Venda cancelada e saldo recalculado.', 'warning');
-      }, 'warning');
-    }
-    function apagarVenda(id) {
-      const mov = movimentacoes.find(m => m.id === id);
-      if (!mov) return;
-      confirmarAcao('Apagar venda', `Deseja apagar definitivamente esta movimentação de <strong>${escaparHTML(mov.nome)}</strong>?`, 'Apagar venda', () => {
-        movimentacoes = movimentacoes.filter(m => m.id !== id);
-        reconstruirConsumoCashback(mov.clienteId); recalcularCliente(mov.clienteId);
-        registrarEvento('venda_excluida', mov);
-        salvarBancoLocal(); renderizarHistorico(); selecionarClienteVenda(false);
-        mostrarToast('Venda apagada com sucesso.', 'danger');
-      });
-    }
+        <div class="card span-7">
+          <div class="metric-label">Despesas operacionais consideradas</div>
+          <ul class="expense-list">
+            <li><span>Impostos</span><b>R$ 5.377,76</b></li>
+            <li><span>CMV</span><b>R$ 17.467,26</b></li>
+            <li><span>Pessoal</span><b>R$ 9.750,86</b></li>
+            <li><span>Administrativas</span><b>R$ 8.739,91</b></li>
+            <li><span>Marketing</span><b>R$ 537,00</b></li>
+            <li><span>Logística</span><b>R$ 64,40</b></li>
+            <li><span>Taxas de venda</span><b>R$ 1.787,51</b></li>
+          </ul>
+        </div>
 
-    function popularFiltroMeses() {
-      const select = document.getElementById('filtroMesAniversario');
-      if (!select) return;
-      const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-      const mesAtual = new Date().getMonth() + 1;
-      select.innerHTML = '<option value="todos">Todos os meses</option>' + meses.map((m, i) => `<option value="${i+1}">${m}</option>`).join('');
-      select.value = String(mesAtual);
-    }
-    function renderizarAniversarios() {
-      const mes = document.getElementById('filtroMesAniversario')?.value || 'todos';
-      const msgBase = document.getElementById('mensagemWhatsapp')?.value || '';
-      const lista = clientes.filter(c => c.nascimento && (mes === 'todos' || Number(c.nascimento.split('-')[1]) === Number(mes))).sort((a,b) => a.nascimento.slice(5).localeCompare(b.nascimento.slice(5)));
-      const area = document.getElementById('listaAniversarios');
-      if (!lista.length) { area.innerHTML = '<div class="empty">Nenhum aniversário encontrado para o filtro selecionado.</div>'; return; }
-      const tabela = `<div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Telefone</th><th>Data</th><th>WhatsApp</th></tr></thead><tbody>${lista.map(c => {
-        const mensagem = encodeURIComponent(msgBase.replace('{nome}', c.nome));
-        const link = `https://wa.me/55${c.telefone}?text=${mensagem}`;
-        return `<tr><td><strong>${escaparHTML(c.nome)}</strong></td><td>${escaparHTML(formatarTelefone(c.telefone))}</td><td>${escaparHTML(dataBR(c.nascimento))}</td><td><a class="btn" href="${link}" target="_blank" rel="noopener">Enviar mensagem</a></td></tr>`;
-      }).join('')}</tbody></table></div>`;
-      const cards = `<div class="mobile-list">${lista.map(c => {
-        const mensagem = encodeURIComponent(msgBase.replace('{nome}', c.nome));
-        const link = `https://wa.me/55${c.telefone}?text=${mensagem}`;
-        return `<div class="mobile-record-card"><h3>${escaparHTML(c.nome)}</h3><p>${escaparHTML(formatarTelefone(c.telefone))}</p><div class="mobile-record-meta"><div><span>Aniversário</span><strong>${escaparHTML(dataBR(c.nascimento))}</strong></div></div><div class="mobile-actions one"><a class="btn" href="${link}" target="_blank" rel="noopener">Enviar WhatsApp</a></div></div>`;
-      }).join('')}</div>`;
-      area.innerHTML = tabela + cards;
-    }
+        <div class="card dark-card span-5">
+          <div class="metric-label">Valores desconsiderados</div>
+          <ul class="expense-list">
+            <li><span>Pagamento de empréstimos</span><b>R$ 10.876,43</b></li>
+            <li><span>Investimentos/imobilizado</span><b>R$ 1.962,77</b></li>
+          </ul>
+          <div style="height: 18px"></div>
+          <div class="metric-label">Total extraordinário</div>
+          <div class="metric-value">R$ 12.839,20</div>
+          <div class="metric-note">Valores que reduzem o lucro final, mas não indicam problema operacional.</div>
+        </div>
+      </div>
+    </section>
 
-    function exportarBackupCSV() {
-      const linhas = [['ID','Data','Status','Nome','Telefone','Valor Compra','Cashback Gerado','Cashback Disponivel','Cashback Usado','Valor Final Pago','Saldo Final','Percentual Cashback','Validade Dias','Validade Até']];
-      movimentacoes.forEach(m => linhas.push([m.id, m.data, m.status || 'ativo', m.nome, m.telefone, m.valorCompra, m.cashbackGerado, m.cashbackGeradoDisponivel, m.cashbackUsado, m.valorFinalPago, m.saldoFinal, m.percentualCashback, m.validadeCashback, m.validadeAte]));
-      baixarCSV(linhas, 'backup_vendas_cashback.csv'); mostrarToast('Backup de vendas gerado com sucesso.', 'success');
-    }
-    function exportarClientesCSV() {
-      const linhas = [['ID','Nome','Telefone','Nascimento','Observacao','Saldo','Total Compras','Cashback Gerado','Cashback Usado','Criado em','Atualizado em']];
-      clientes.forEach(c => linhas.push([c.id, c.nome, c.telefone, c.nascimento, c.observacao, c.saldo, c.totalCompras, c.cashbackGerado, c.cashbackUsado, c.criadoEm, c.atualizadoEm]));
-      baixarCSV(linhas, 'backup_clientes_cashback.csv'); mostrarToast('Backup de clientes gerado com sucesso.', 'success');
-    }
-    function exportarEventosCSV() {
-      const linhas = [['Evento ID','Tipo','Origem','Data','Timestamp','Dados JSON']];
-      eventosAuditoria.forEach(e => linhas.push([e.eventoId, e.tipo, e.origem, e.data, e.timestamp, JSON.stringify(e.dados)]));
-      baixarCSV(linhas, 'auditoria_eventos_cashback.csv'); mostrarToast('Auditoria exportada com sucesso.', 'success');
-    }
-    function baixarCSV(linhas, nomeArquivo) {
-      const csv = '\ufeff' + linhas.map(linha => linha.map(campo => `"${String(campo ?? '').replaceAll('"', '""')}"`).join(';')).join('\n');
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a'); link.href = url; link.download = nomeArquivo; link.click(); URL.revokeObjectURL(url);
-    }
-    function confirmarLimparTudo() {
-      confirmarAcao('Apagar todos os dados', 'Esta ação apagará clientes, vendas, configurações e auditoria salvos neste navegador. Não é possível desfazer.', 'Apagar tudo', () => {
-        clientes = []; movimentacoes = []; eventosAuditoria = []; clienteAtual = null;
-        Object.values(STORAGE_KEYS).forEach(k => localStorage.removeItem(k));
-        salvarBancoLocal(); renderizarClientes(); renderizarHistorico(); atualizarTelaCliente(); atualizarSelectClientes(); renderizarAniversarios();
-        mostrarToast('Todos os dados locais foram apagados.', 'danger');
-      });
-    }
-    async function enviarParaGoogleSheets(evento) {
-      if (!configuracoes.googleScriptUrl) return;
-      try {
-        await fetch(configuracoes.googleScriptUrl, {
-          method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(evento)
-        });
-      } catch (erro) { console.error('Erro ao enviar para Google Sheets', erro); mostrarToast('Não foi possível enviar para Google Sheets. O dado ficou salvo localmente.', 'warning'); }
-    }
+    <section id="comparativo">
+      <div class="section-title">
+        <h2>Leitura comparativa</h2>
+        <span>Março x Abril</span>
+      </div>
 
-    popularFiltroMeses();
-    carregarConfiguracoesNaTela();
-    reconstruirTodosConsumos();
-    recalcularTodosClientes();
-    salvarBancoLocal();
-    renderizarClientes();
-    renderizarHistorico();
-    renderizarAniversarios();
+      <div class="compare">
+        <div class="card result-card-negative">
+          <div class="pill">Março</div>
+          <div class="metric-value negative">- R$ 1.613</div>
+          <p class="metric-note">
+            Resultado operacional praticamente em equilíbrio, porém pressionado por CMV elevado.
+            Além disso, houve R$ 12.166,07 em valores extraordinários desconsiderados.
+          </p>
+        </div>
 
-    function reconstruirTodosConsumos() { clientes.forEach(c => reconstruirConsumoCashback(c.id)); }
+        <div class="card result-card-positive">
+          <div class="pill">Abril</div>
+          <div class="metric-value positive">+ R$ 6.023</div>
+          <p class="metric-note">
+            Mesmo com faturamento menor, a loja apresentou lucro operacional positivo,
+            reforçando a evolução da margem e do controle operacional.
+          </p>
+        </div>
+      </div>
+    </section>
 
-    async function sincronizarDoGoogleSheets() {
-  if (!GOOGLE_SCRIPT_URL) {
-    mostrarToast('Configure primeiro a URL do Google Apps Script.', 'warning');
-    return;
-  }
+    <section id="conclusao" class="conclusion">
+      <h2>Conclusão executiva</h2>
+      <p>
+        A análise demonstra que a unidade Trevo João Pessoa possui capacidade operacional e comercial saudável.
+        O resultado final é pressionado principalmente por compromissos paralelos à operação, como empréstimos,
+        consórcios, investimentos estruturais e despesas extraordinárias.
+        <br><br>
+        A leitura gerencial correta é que a loja possui geração de caixa operacional, especialmente evidenciada
+        em abril, quando apresentou lucro positivo mesmo com faturamento inferior ao mês anterior.
+      </p>
+    </section>
+  </main>
 
-  try {
-    mostrarToast('Sincronizando com Google Sheets...', 'success');
-
-    const resposta = await fetch(GOOGLE_SCRIPT_URL);
-    const dados = await resposta.json();
-
-    if (dados.status !== 'ok') {
-      mostrarToast('Erro ao buscar dados: ' + dados.mensagem, 'danger');
-      return;
-    }
-
-    clientes = dados.clientes || [];
-    movimentacoes = dados.movimentacoes || [];
-
-    salvarBancoLocal();
-    renderizarClientes();
-    renderizarHistorico();
-    atualizarSelectClientes();
-    atualizarTelaCliente();
-
-    mostrarToast('Dados puxados do Google Sheets com sucesso.', 'success');
-
-  } catch (erro) {
-    console.error(erro);
-    mostrarToast('Não foi possível sincronizar com o Google Sheets.', 'danger');
-  }
-}
-  </script>
+  <div class="footer">
+    🍀 Trevo Açaí — Construa sua sorte
+  </div>
 </body>
 </html>
-
-<!--
-====================================================
-GOOGLE APPS SCRIPT RECOMENDADO PARA PLANILHA AUDITÁVEL
-====================================================
-
-1. Crie uma planilha no Google Sheets.
-2. Vá em Extensões > Apps Script.
-3. Cole o código abaixo.
-4. Clique em Implantar > Nova implantação > App da Web.
-5. Em "Quem pode acessar", escolha conforme sua operação.
-6. Copie a URL do Web App e cole no campo "URL do Google Apps Script" dentro do sistema.
-
-function doPost(e) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var payload = JSON.parse(e.postData.contents);
-  var aba = ss.getSheetByName("Eventos") || ss.insertSheet("Eventos");
-
-  if (aba.getLastRow() === 0) {
-    aba.appendRow(["Evento ID", "Tipo", "Origem", "Data", "Timestamp", "Dados JSON"]);
-  }
-
-  aba.appendRow([
-    payload.eventoId || "",
-    payload.tipo || "",
-    payload.origem || "",
-    payload.data || "",
-    payload.timestamp || "",
-    JSON.stringify(payload.dados || {})
-  ]);
-
-  return ContentService
-    .createTextOutput(JSON.stringify({ status: "ok" }))
-    .setMimeType(ContentService.MimeType.JSON);
-}
--->
